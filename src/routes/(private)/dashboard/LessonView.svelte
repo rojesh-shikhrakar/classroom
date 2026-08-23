@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { renderMarkdown } from '$lib/markdown';
 	import type { LessonContent, ModuleContent } from '$lib/types/classroom';
 
 	let {
@@ -47,9 +46,9 @@
 		</div>
 		<div class="rule"></div>
 		<div class="lesson-content">
-			<!-- The local renderer escapes HTML and validates link protocols. -->
+			<!-- Lesson Markdown is compiled with mdsvex and sanitized on the server. -->
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			{@html renderMarkdown(lesson?.content.join('\n\n') ?? '')}
+			{@html lesson?.renderedContent ?? ''}
 		</div>
 		{#if lesson?.id === 'lesson_attention'}<figure>
 				<div class="concept-visual" aria-label="The word bank connecting most strongly to river">

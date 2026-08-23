@@ -1,9 +1,9 @@
-:global(body) {
+body {
 	overflow: hidden;
 	background: #f8f6ef;
 }
-:global(button:focus-visible),
-:global(input:focus-visible) {
+button:focus-visible,
+input:focus-visible {
 	outline: 3px solid #e46035;
 	outline-offset: 3px;
 }
@@ -668,39 +668,91 @@ article h1 {
 	margin: 2.25rem 0;
 	background: #dddcd4;
 }
-.lesson-content :global(p) {
+.lesson-content p {
 	color: #39463c;
 	font:
 		400 1.08rem/1.85 Georgia,
 		serif;
 }
-.lesson-content :global(p:first-child) {
+.lesson-content p:first-child {
 	color: #243c2d;
 	font-size: 1.3rem;
 	line-height: 1.7;
 }
-.lesson-content :global(h1),
-.lesson-content :global(h2),
-.lesson-content :global(h3) {
+.lesson-content h1,
+.lesson-content h2,
+.lesson-content h3 {
 	margin: 2.25rem 0 0.8rem;
 	color: #173e29;
 	font-family: Georgia, serif;
 }
-.lesson-content :global(ul),
-.lesson-content :global(ol) {
+.lesson-content ul,
+.lesson-content ol {
 	padding-left: 1.5rem;
 	color: #39463c;
 	font:
 		400 1.08rem/1.85 Georgia,
 		serif;
 }
-.lesson-content :global(blockquote) {
+.lesson-content ul {
+	list-style: disc outside;
+}
+.lesson-content ol {
+	list-style: decimal outside;
+}
+.lesson-content li {
+	padding-left: 0.35rem;
+}
+.lesson-content li + li {
+	margin-top: 0.35rem;
+}
+.lesson-content img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 2rem auto;
+	border-radius: 0.75rem;
+}
+.lesson-content pre {
+	overflow-x: auto;
+	margin: 2rem 0;
+	padding: 1.25rem 1.4rem;
+	border: 1px solid #31513c;
+	border-radius: 0.75rem;
+	background: #14291c;
+	color: #f4f1e8;
+	font:
+		0.9rem/1.7 ui-monospace,
+		SFMono-Regular,
+		Consolas,
+		monospace;
+	tab-size: 2;
+}
+.lesson-content pre code {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+}
+.lesson-content :not(pre) > code {
+	padding: 0.12em 0.35em;
+	border-radius: 0.25rem;
+	background: #e7e5dc;
+	color: #24412f;
+	font:
+		0.88em/1.5 ui-monospace,
+		SFMono-Regular,
+		Consolas,
+		monospace;
+}
+.lesson-content blockquote {
 	margin: 2rem 0;
 	padding: 0.2rem 1.5rem;
 	border-left: 3px solid #e15d34;
 	background: #efede5;
 }
-.lesson-content :global(a) {
+.lesson-content a {
 	color: #b94829;
 	text-underline-offset: 0.16em;
 }

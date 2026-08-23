@@ -1,6 +1,7 @@
 import { and, asc, desc, eq } from 'drizzle-orm';
 import type { ClassroomContent } from '$lib/types/classroom';
 import { getDb } from './db';
+import { renderLessonMarkdown } from './markdown';
 import {
 	classroom,
 	classroomEnrollment,
@@ -38,7 +39,19 @@ async function getClassroomById(d1: D1Database, classroomId: string) {
 		if (row.lesson) module.lessons.push(row.lesson);
 	}
 
-	return { ...record, modules: [...modules.values()] } satisfies ClassroomContent;
+	const renderedModules = await Promise.all(
+		[...modules.values()].map(async (module) => ({
+			...module,
+			lessons: await Promise.all(
+				module.lessons.map(async (lesson) => ({
+					...lesson,
+					renderedContent: await renderLessonMarkdown(lesson.content.join('\n\n'))
+				}))
+			)
+		}))
+	);
+
+	return { ...record, modules: renderedModules } satisfies ClassroomContent;
 }
 
 export async function findClassroomByCode(d1: D1Database, rawCode: string) {

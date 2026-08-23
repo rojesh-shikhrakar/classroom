@@ -9,12 +9,17 @@ function escapeHtml(value: string) {
 
 function safeUrl(value: string) {
 	const url = value.trim();
-	return /^(https?:\/\/|mailto:|\/|#)/i.test(url) ? escapeHtml(url) : '#';
+	return url && !/^(?:javascript|data|vbscript):/i.test(url) ? escapeHtml(url) : '#';
 }
 
 function inlineMarkdown(value: string) {
 	return escapeHtml(value)
 		.replace(/`([^`]+)`/g, '<code>$1</code>')
+		.replace(
+			/!\[([^\]]*)\]\(([^\s)]+)(?:\s+[&quot;]([^&]*?)[&quot;])?\)/g,
+			(_match, alt: string, url: string, title?: string) =>
+				`<img src="${safeUrl(url)}" alt="${alt}"${title ? ` title="${title}"` : ''}>`
+		)
 		.replace(
 			/\[([^\]]+)\]\(([^\s)]+)\)/g,
 			(_match, label: string, url: string) =>

@@ -4,6 +4,7 @@ export type LessonContent = {
 	type: 'article' | 'video' | 'quiz' | 'lab' | 'project';
 	summary: string;
 	content: string[];
+	renderedContent?: string;
 	durationMinutes: number;
 	position: number;
 };
