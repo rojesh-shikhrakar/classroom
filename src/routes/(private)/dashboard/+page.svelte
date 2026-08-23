@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
-	import type { PageServerData } from './$types';
-	let { data }: { data: PageServerData } = $props();
+	import type { PageData } from './$types';
+	let { data }: { data: PageData } = $props();
 	let code = $state('');
 	let message = $state('');
 	function joinClassroom(event: SubmitEvent) {

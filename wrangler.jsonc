@@ -8,6 +8,9 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
+	"secrets": {
+		"required": ["ORIGIN", "BETTER_AUTH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]
+	},
 	"workers_dev": true,
 	"preview_urls": true,
 	"d1_databases": [
