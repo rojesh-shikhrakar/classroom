@@ -3,14 +3,16 @@
 </script>
 
 <svelte:head>
-	<title>Northstar AI — Learn AI by doing</title>
+	<title>Learn AI by doing</title>
 	<meta name="description" content="A focused AI classroom for curious minds." />
 </svelte:head>
 
 <div class="site-shell">
 	<header>
-		<a class="brand" href={resolve('/')} aria-label="Northstar AI home"
-			><span class="mark" aria-hidden="true">N</span><span>Northstar <strong>AI</strong></span></a
+		<a class="brand" href={resolve('/')} aria-label="Rojesh AI Class Home"
+			><span class="mark" aria-hidden="true">AI</span><span
+				>Learn <strong>AI</strong> with Rojesh</span
+			></a
 		>
 		<a class="login-link" href={resolve('/login')}>Log in <span aria-hidden="true">→</span></a>
 	</header>
@@ -36,6 +38,8 @@
 		</div>
 	</main>
 	<footer>
-		<span>Small lessons. Big ideas.</span><span>© {new Date().getFullYear()} Northstar AI</span>
+		<span>Small lessons. Big ideas.</span><span
+			>© {new Date().getFullYear()} Rojesh M. Shikhrakar</span
+		>
 	</footer>
 </div>

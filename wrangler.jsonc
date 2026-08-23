@@ -18,6 +18,7 @@
 			"binding": "DB",
 			"database_name": "personal-class",
 			"database_id": "593d87e1-d8de-4bdc-a087-9954351fa254",
+			"migrations_dir": "drizzle",
 			"remote": true
 		}
 	]

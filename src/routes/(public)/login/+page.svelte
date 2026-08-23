@@ -7,12 +7,10 @@
 	let showPassword = $state(false);
 </script>
 
-<svelte:head
-	><title>{createAccount ? 'Create account' : 'Log in'} — Northstar AI</title></svelte:head
->
+<svelte:head><title>{createAccount ? 'Create account' : 'Log in'} — Learn AI</title></svelte:head>
 <main class="auth-page">
-	<a class="brand" href={resolve('/')} aria-label="Northstar AI home"
-		><span class="mark">N</span> Northstar <strong>AI</strong></a
+	<a class="brand" href={resolve('/')} aria-label="Learn AI with Rojesh home"
+		><span class="mark">N</span> Learn <strong>AI</strong> with Rojesh</a
 	>
 	<section class="auth-card">
 		<div class="card-heading">
@@ -83,7 +81,7 @@
 			>
 		</form>
 		<p class="switch">
-			{createAccount ? 'Already have an account?' : 'New to Northstar?'}
+			{createAccount ? 'Already have an account?' : "New to Rojesh's Class?"}
 			<button type="button" onclick={() => (createAccount = !createAccount)}
 				>{createAccount ? 'Log in' : 'Create account'}</button
 			>

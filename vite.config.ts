@@ -14,7 +14,14 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter(),
+			adapter: adapter({
+				platformProxy: {
+					configPath: './wrangler.jsonc',
+					// Keep `bun run dev` local even though Wrangler CLI commands use the
+					// remote D1 database declared in wrangler.jsonc.
+					remoteBindings: false
+				}
+			}),
 			preprocess: [mdsvex({ extensions: ['.svx', '.md'] })],
 			extensions: ['.svelte', '.svx', '.md'],
 			typescript: {
