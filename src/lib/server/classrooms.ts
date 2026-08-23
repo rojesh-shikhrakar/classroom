@@ -110,6 +110,7 @@ export async function completeLesson(
 		.select({ id: lesson.id })
 		.from(lesson)
 		.innerJoin(courseModule, eq(courseModule.id, lesson.moduleId))
+		.innerJoin(classroom, eq(classroom.id, courseModule.classroomId))
 		.innerJoin(
 			classroomEnrollment,
 			and(
