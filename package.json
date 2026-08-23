@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "CI=1 wrangler d1 migrations apply personal-class --local && vite dev",
-		"build": "wrangler types --check && vite build",
+		"build": "vite build",
+		"check:worker-types": "vite build && wrangler types --check",
 		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
