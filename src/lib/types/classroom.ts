@@ -21,5 +21,7 @@ export type ClassroomContent = {
 	code: string;
 	title: string;
 	description: string;
+	term: string;
+	published: boolean;
 	modules: ModuleContent[];
 };

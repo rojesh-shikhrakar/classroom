@@ -8,3 +8,5 @@ bun.lockb
 # Miscellaneous
 /static/
 /drizzle/
+/.github/skills/
+/worker-configuration.d.ts

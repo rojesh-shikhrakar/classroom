@@ -1,16 +1,28 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { ActionData } from './$types';
 	let { form }: { form: ActionData } = $props();
 	let createAccount = $state(false);
 	let showPassword = $state(false);
+	let submitting = $state(false);
+	const enhanceForm: SubmitFunction = () => {
+		submitting = true;
+		return async ({ update }) => {
+			try {
+				await update();
+			} finally {
+				submitting = false;
+			}
+		};
+	};
 </script>
 
 <svelte:head><title>{createAccount ? 'Create account' : 'Log in'} — Learn AI</title></svelte:head>
 <main class="auth-page">
 	<a class="brand" href={resolve('/')} aria-label="Learn AI with Rojesh home"
-		><span class="mark">N</span> Learn <strong>AI</strong> with Rojesh</a
+		><span class="mark">AI</span> Learn <strong>AI</strong> with Rojesh</a
 	>
 	<section class="auth-card">
 		<div class="card-heading">
@@ -22,8 +34,8 @@
 					: 'Sign in to continue to your classroom.'}
 			</p>
 		</div>
-		<form method="post" action="?/google" use:enhance>
-			<button class="google" type="submit"
+		<form method="post" action="?/google" use:enhance={enhanceForm} aria-busy={submitting}>
+			<button class="google" type="submit" disabled={submitting}
 				><svg viewBox="0 0 24 24" aria-hidden="true"
 					><path
 						fill="#4285f4"
@@ -42,7 +54,12 @@
 			>
 		</form>
 		<div class="divider"><span>or continue with email</span></div>
-		<form method="post" action={createAccount ? '?/signUp' : '?/signIn'} use:enhance>
+		<form
+			method="post"
+			action={createAccount ? '?/signUp' : '?/signIn'}
+			use:enhance={enhanceForm}
+			aria-busy={submitting}
+		>
 			{#if createAccount}<label for="name">Your name</label><input
 					id="name"
 					name="name"
@@ -67,6 +84,7 @@
 					autocomplete={createAccount ? 'new-password' : 'current-password'}
 					minlength="8"
 					required
+					aria-describedby={form?.message ? 'auth-error' : undefined}
 					placeholder="At least 8 characters"
 				/><button
 					class="show"
@@ -75,14 +93,15 @@
 					onclick={() => (showPassword = !showPassword)}>{showPassword ? 'Hide' : 'Show'}</button
 				>
 			</div>
-			{#if form?.message}<p class="error" role="alert">{form.message}</p>{/if}
-			<button class="submit" type="submit"
-				>{createAccount ? 'Create account' : 'Log in'} <span>→</span></button
+			{#if form?.message}<p class="error" id="auth-error" role="alert">{form.message}</p>{/if}
+			<button class="submit" type="submit" disabled={submitting}
+				>{submitting ? 'Please wait…' : createAccount ? 'Create account' : 'Log in'}
+				<span>→</span></button
 			>
 		</form>
 		<p class="switch">
 			{createAccount ? 'Already have an account?' : "New to Rojesh's Class?"}
-			<button type="button" onclick={() => (createAccount = !createAccount)}
+			<button type="button" disabled={submitting} onclick={() => (createAccount = !createAccount)}
 				>{createAccount ? 'Log in' : 'Create account'}</button
 			>
 		</p>

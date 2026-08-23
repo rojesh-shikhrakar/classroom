@@ -18,6 +18,8 @@ export const classroom = sqliteTable(
 		code: text('code').notNull(),
 		title: text('title').notNull(),
 		description: text('description').notNull().default(''),
+		term: text('term').notNull().default(''),
+		published: integer('published', { mode: 'boolean' }).notNull().default(false),
 		createdAt: integer('created_at', { mode: 'timestamp_ms' })
 			.notNull()
 			.$defaultFn(() => new Date())
@@ -59,6 +61,7 @@ export const lesson = sqliteTable(
 			.default('article'),
 		summary: text('summary').notNull().default(''),
 		content: text('content', { mode: 'json' }).$type<string[]>().notNull().default([]),
+		details: text('details').notNull().default(''),
 		durationMinutes: integer('duration_minutes').notNull().default(0),
 		position: integer('position').notNull()
 	},

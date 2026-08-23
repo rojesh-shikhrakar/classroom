@@ -47,7 +47,7 @@ export async function findClassroomByCode(d1: D1Database, rawCode: string) {
 	const [record] = await db
 		.select({ id: classroom.id })
 		.from(classroom)
-		.where(eq(classroom.code, code))
+		.where(and(eq(classroom.code, code), eq(classroom.published, true)))
 		.limit(1);
 	return record ? getClassroomById(d1, record.id) : null;
 }
@@ -57,7 +57,8 @@ export async function getLatestClassroomForUser(d1: D1Database, userId: string) 
 	const [record] = await db
 		.select({ classroomId: classroomEnrollment.classroomId })
 		.from(classroomEnrollment)
-		.where(eq(classroomEnrollment.userId, userId))
+		.innerJoin(classroom, eq(classroom.id, classroomEnrollment.classroomId))
+		.where(and(eq(classroomEnrollment.userId, userId), eq(classroom.published, true)))
 		.orderBy(desc(classroomEnrollment.joinedAt))
 		.limit(1);
 	return record ? getClassroomById(d1, record.classroomId) : null;
@@ -78,6 +79,14 @@ export async function enrollUser(d1: D1Database, userId: string, classroomId: st
 		});
 }
 
+export async function unenrollUser(d1: D1Database, userId: string, classroomId: string) {
+	await getDb(d1)
+		.delete(classroomEnrollment)
+		.where(
+			and(eq(classroomEnrollment.userId, userId), eq(classroomEnrollment.classroomId, classroomId))
+		);
+}
+
 export async function getCompletedLessonIds(d1: D1Database, userId: string, classroomId: string) {
 	const db = getDb(d1);
 	const rows = await db
@@ -85,6 +94,7 @@ export async function getCompletedLessonIds(d1: D1Database, userId: string, clas
 		.from(lessonCompletion)
 		.innerJoin(lesson, eq(lesson.id, lessonCompletion.lessonId))
 		.innerJoin(courseModule, eq(courseModule.id, lesson.moduleId))
+		.innerJoin(classroom, eq(classroom.id, courseModule.classroomId))
 		.where(and(eq(lessonCompletion.userId, userId), eq(courseModule.classroomId, classroomId)));
 	return rows.map((row) => row.lessonId);
 }
@@ -107,7 +117,13 @@ export async function completeLesson(
 				eq(classroomEnrollment.userId, userId)
 			)
 		)
-		.where(and(eq(lesson.id, lessonId), eq(courseModule.classroomId, classroomId)))
+		.where(
+			and(
+				eq(lesson.id, lessonId),
+				eq(courseModule.classroomId, classroomId),
+				eq(classroom.published, true)
+			)
+		)
 		.limit(1);
 	if (!allowedLesson) return false;
 

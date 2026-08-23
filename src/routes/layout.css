@@ -407,129 +407,12 @@ a {
 }
 .legal {
 	margin: 1.4rem 0 0;
-	color: #848b84;
-	font-size: 0.66rem;
+	color: #5f675f;
+	font-size: 0.75rem;
 }
 
-.dashboard-shell {
-	min-height: 100dvh;
-	padding: 0 clamp(1.25rem, 5vw, 5rem);
-	background: #f5f2e9;
-}
-.account {
-	display: flex;
-	align-items: center;
-	gap: 0.7rem;
-	font-size: 0.75rem;
-}
-.avatar {
-	display: grid;
-	width: 2rem;
-	height: 2rem;
-	place-items: center;
-	border-radius: 50%;
-	background: #dce8d6;
-	color: #183f2a;
-	font-weight: 800;
-}
-.account form button {
-	min-height: 44px;
-	border: 0;
-	background: transparent;
-	color: #697269;
-	text-decoration: underline;
-	cursor: pointer;
-}
-.dashboard-shell main {
-	display: grid;
-	min-height: calc(100dvh - 10rem);
-	grid-template-columns: 1fr minmax(21rem, 28rem);
-	align-items: center;
-	gap: 8vw;
-	padding: 4rem 5vw;
-}
-.welcome h1 {
-	font-size: clamp(3.2rem, 6vw, 6rem);
-}
-.welcome p {
-	margin-top: 1.5rem;
-	color: #687168;
-}
-.join-card {
-	position: relative;
-	padding: 2.4rem;
-	border: 1px solid #d5d9cf;
-	border-radius: 1.4rem;
-	background: #fffefa;
-	box-shadow: 0 26px 70px #203a2414;
-}
-.card-icon {
-	display: grid;
-	width: 3rem;
-	height: 3rem;
-	place-items: center;
-	border-radius: 50%;
-	background: #e8542d;
-	color: white;
-	font-size: 1.2rem;
-}
-.join-card h2 {
-	margin: 1.4rem 0 0.35rem;
-	color: #173a25;
-	font:
-		400 2rem Georgia,
-		serif;
-}
-.join-card > p {
-	margin: 0;
-	color: #747c74;
-	font-size: 0.8rem;
-}
-.join-card input {
-	text-transform: uppercase;
-	letter-spacing: 0.16em;
-	font-weight: 700;
-}
-.join-card form button {
-	display: flex;
-	width: 100%;
-	min-height: 3.2rem;
-	align-items: center;
-	justify-content: space-between;
-	margin-top: 1rem;
-	padding: 0 1.2rem;
-	border: 0;
-	border-radius: 0.7rem;
-	background: #183f2a;
-	color: #fff;
-	font-size: 0.85rem;
-	font-weight: 700;
-	cursor: pointer;
-}
-.message {
-	margin: 1rem 0 0 !important;
-	color: #287240 !important;
-	font-size: 0.76rem !important;
-}
-.message.error {
-	color: #b4311f !important;
-}
-.dashboard-shell footer {
-	min-height: 4.5rem;
-	border-top: 1px solid #d8d7ca;
-	color: #727a72;
-	font-size: 0.75rem;
-	display: flex;
-	align-items: center;
-	gap: 0.35rem;
-}
-.dashboard-shell footer span {
-	font-weight: 700;
-	color: #39463d;
-}
 @media (max-width: 800px) {
-	.site-shell main,
-	.dashboard-shell main {
+	.site-shell main {
 		grid-template-columns: 1fr;
 		padding: 4rem 0;
 	}
@@ -549,26 +432,12 @@ a {
 	.site-shell footer {
 		margin-top: 2rem;
 	}
-	.dashboard-shell main {
-		gap: 3rem;
-	}
-	.account-name {
-		display: none;
-	}
 }
 @media (max-width: 480px) {
 	.hero h1 {
 		font-size: 3.35rem;
 	}
 	.auth-card {
-		padding: 1.5rem;
-	}
-	.dashboard-shell main {
-		display: block;
-		padding-top: 3rem;
-	}
-	.join-card {
-		margin-top: 3rem;
 		padding: 1.5rem;
 	}
 	.site-shell footer {

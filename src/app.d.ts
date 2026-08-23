@@ -6,11 +6,7 @@ import { createAuth } from '$lib/server/auth';
 declare global {
 	namespace App {
 		interface Platform {
-			env: Env;
-			ctx: ExecutionContext;
-			caches: CacheStorage;
-			cf?: IncomingRequestCfProperties;
-			env: Env;
+			env: Env & { ADMIN_EMAILS?: string };
 			ctx: ExecutionContext;
 			caches: CacheStorage;
 			cf?: IncomingRequestCfProperties;

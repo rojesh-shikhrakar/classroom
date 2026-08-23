@@ -5,7 +5,8 @@ import {
 	findClassroomByCode,
 	getCompletedLessonIds,
 	getLatestClassroomForUser,
-	normalizeClassCode
+	normalizeClassCode,
+	unenrollUser
 } from '$lib/server/classrooms';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -54,7 +55,11 @@ export const actions: Actions = {
 		}
 
 		await enrollUser(database, locals.user.id, classroom.id);
-		return { success: true, classroom };
+		return {
+			success: true,
+			classroom,
+			completedLessonIds: await getCompletedLessonIds(database, locals.user.id, classroom.id)
+		};
 	},
 	completeLesson: async ({ locals, platform, request }) => {
 		if (!locals.user) redirect(303, '/login');
@@ -74,6 +79,15 @@ export const actions: Actions = {
 			completedLessonId: lessonId,
 			completedLessonIds: await getCompletedLessonIds(database, locals.user.id, classroomId)
 		};
+	},
+	leaveClassroom: async ({ locals, platform, request }) => {
+		if (!locals.user) redirect(303, '/login');
+		const classroomId = (await request.formData()).get('classroomId');
+		if (typeof classroomId !== 'string' || !classroomId) {
+			return fail(400, { leaveError: 'The classroom could not be left.' });
+		}
+		await unenrollUser(requireDatabase(platform), locals.user.id, classroomId);
+		return { leftClassroom: true };
 	},
 	signOut: async ({ locals, request }) => {
 		await locals.auth.api.signOut({ headers: request.headers });

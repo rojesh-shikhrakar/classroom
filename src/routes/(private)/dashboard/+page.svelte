@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { untrack } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { renderMarkdown } from '$lib/markdown';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let code = $state('');
-	let leftClass = $state(false);
+	let joinedClassroom = $state(untrack(() => data.classroom));
 	let collapsed = $state(false);
 	let mobileOpen = $state(false);
-	const activeClass = $derived(form?.classroom ?? data.classroom);
-	const inClass = $derived(Boolean(activeClass) && !leftClass);
+	const activeClass = $derived(joinedClassroom);
+	const inClass = $derived(Boolean(activeClass));
 	let activeLesson = $state('');
-	let expandedModules = $state(new Set<string>());
+	const expandedModules = new SvelteSet<string>();
 
 	const modules = $derived(activeClass?.modules ?? []);
 	const currentLesson = $derived(
@@ -24,7 +26,7 @@
 	const currentTitle = $derived(currentLesson?.title ?? 'Lesson');
 	const orderedLessons = $derived(modules.flatMap((module) => module.lessons));
 	const completedLessonIds = $derived(
-		new Set(form?.completedLessonIds ?? data.completedLessonIds ?? [])
+		new SvelteSet(form?.completedLessonIds ?? data.completedLessonIds ?? [])
 	);
 	const progress = $derived(
 		orderedLessons.length === 0
@@ -39,16 +41,18 @@
 
 	$effect(() => {
 		if (form?.code) code = form.code;
+		if (form?.classroom) joinedClassroom = form.classroom;
+		if (form?.leftClassroom) joinedClassroom = null;
 		if (!activeLesson && activeClass) {
 			activeLesson = activeClass.modules[0]?.lessons[0]?.id ?? '';
-			expandedModules = new Set(activeClass.modules.map((module) => module.id));
+			expandedModules.clear();
+			for (const module of activeClass.modules) expandedModules.add(module.id);
 		}
 	});
 
 	function toggleModule(id: string) {
-		const next = new Set(expandedModules);
-		next.has(id) ? next.delete(id) : next.add(id);
-		expandedModules = next;
+		if (expandedModules.has(id)) expandedModules.delete(id);
+		else expandedModules.add(id);
 	}
 
 	function openLesson(id: string) {
@@ -136,7 +140,7 @@
 			</div>
 			<nav>
 				<p class="nav-label">Course content</p>
-				{#each modules as module, index}
+				{#each modules as module, index (module.id)}
 					<div class="module">
 						<button
 							class="module-button"
@@ -162,7 +166,7 @@
 						</button>
 						{#if expandedModules.has(module.id)}
 							<div class="lesson-list">
-								{#each module.lessons as lesson}
+								{#each module.lessons as lesson (lesson.id)}
 									<button
 										type="button"
 										class:active={activeLesson === lesson.id}
@@ -181,11 +185,14 @@
 			<div class="sidebar-bottom">
 				<div class="avatar">{data.user.name.charAt(0).toUpperCase()}</div>
 				<div class="student-copy"><strong>{data.user.name}</strong><span>Student</span></div>
-				<button type="button" onclick={() => (leftClass = true)} aria-label="Leave classroom">
-					<svg viewBox="0 0 24 24" aria-hidden="true"
-						><path d="M10 17l5-5-5-5M4 12h11M15 4h4v16h-4" /></svg
-					>
-				</button>
+				<form method="post" action="?/leaveClassroom" use:enhance>
+					<input type="hidden" name="classroomId" value={activeClass?.id ?? ''} />
+					<button type="submit" aria-label="Leave classroom">
+						<svg viewBox="0 0 24 24" aria-hidden="true"
+							><path d="M10 17l5-5-5-5M4 12h11M15 4h4v16h-4" /></svg
+						>
+					</button>
+				</form>
 			</div>
 		</aside>
 
@@ -223,6 +230,8 @@
 				</div>
 				<div class="rule"></div>
 				<div class="lesson-content">
+					<!-- The local renderer escapes HTML and validates link protocols. -->
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html renderMarkdown(currentLesson?.content.join('\n\n') ?? '')}
 				</div>
 				{#if currentLesson?.id === 'lesson_attention'}
@@ -567,8 +576,8 @@
 	}
 	.nav-label {
 		margin: 0 0.6rem 0.8rem;
-		color: #8b8e89;
-		font-size: 0.6rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 		font-weight: 750;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
@@ -610,8 +619,8 @@
 		text-overflow: ellipsis;
 	}
 	.module-copy small {
-		color: #8a8e88;
-		font-size: 0.6rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 	}
 	.module-button > svg {
 		width: 0.9rem;
@@ -654,8 +663,8 @@
 		line-height: 1.3;
 	}
 	.lesson-list small {
-		color: #9a9d98;
-		font-size: 0.55rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 		text-transform: capitalize;
 	}
 	.lesson-dot {
@@ -705,18 +714,21 @@
 		text-overflow: ellipsis;
 	}
 	.student-copy span {
-		color: #92958f;
-		font-size: 0.56rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 	}
 	.sidebar-bottom button,
 	.close-mobile {
 		display: grid;
-		min-width: 2.25rem;
-		height: 2.25rem;
+		min-width: 2.75rem;
+		height: 2.75rem;
 		place-items: center;
 		border: 0;
 		background: transparent;
 		color: #777d77;
+	}
+	.sidebar-bottom form {
+		display: grid;
 	}
 	.collapse-control {
 		position: fixed;
@@ -724,8 +736,8 @@
 		top: 50%;
 		left: calc(var(--side) - 0.85rem);
 		display: grid;
-		width: 1.7rem;
-		height: 2.6rem;
+		width: 2.75rem;
+		height: 2.75rem;
 		place-items: center;
 		border: 1px solid #d2d2ca;
 		border-radius: 999px;
@@ -823,8 +835,8 @@
 		display: flex;
 		gap: 1.5rem;
 		margin-top: 2rem;
-		color: #878c87;
-		font-size: 0.67rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 	}
 	.lesson-meta span {
 		display: flex;

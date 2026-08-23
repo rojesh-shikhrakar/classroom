@@ -1,26 +1,13 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { resolve } from '$app/paths';
 	import { renderMarkdown } from '$lib/markdown';
+	import type {
+		AdminClassroom as Classroom,
+		AdminLesson as Item,
+		AdminModule as Module
+	} from '$lib/types/admin';
 	import type { PageData } from './$types';
-
-	type Item = {
-		id: string;
-		title: string;
-		type: 'Article' | 'Video' | 'Activity' | 'Quiz';
-		details: string;
-		summary?: string;
-		body?: string;
-	};
-	type Module = { id: string; title: string; description: string; items: Item[] };
-	type Classroom = {
-		id: string;
-		name: string;
-		term: string;
-		code: string;
-		description: string;
-		published: boolean;
-		modules: Module[];
-	};
 	type Modal = 'class' | 'module' | 'content' | 'settings' | 'preview' | null;
 
 	let { data }: { data: PageData } = $props();
@@ -39,32 +26,43 @@
 	let details = $state('');
 	let summary = $state('');
 	let body = $state('');
+	let initialDraft = $state('');
 	let cmsView = $state<'write' | 'preview'>('write');
 	let bodyField = $state<HTMLTextAreaElement>();
 
 	let classes = $state<Classroom[]>([]);
 	let saveQueue = Promise.resolve();
+	const emptyClass: Classroom = {
+		id: '',
+		name: 'No classroom yet',
+		term: '',
+		code: '',
+		description: '',
+		published: false,
+		studentCount: 0,
+		modules: []
+	};
 	const initialClasses = untrack(() => data.classes);
 	classes = initialClasses;
 	activeId = initialClasses[0]?.id ?? '';
 	selectedId = initialClasses[0]?.modules[0]?.id ?? '';
 
-	const activeClass = $derived(classes.find((c) => c.id === activeId) ?? classes[0]);
+	const activeClass = $derived(classes.find((c) => c.id === activeId) ?? classes[0] ?? emptyClass);
 	const selectedModule = $derived(
 		activeClass.modules.find((m) => m.id === selectedId) ?? activeClass.modules[0]
 	);
 	const itemCount = $derived(activeClass.modules.reduce((sum, m) => sum + m.items.length, 0));
 
-	function persist(next: Classroom[]) {
+	function persist(next: Classroom[], room: Classroom) {
 		classes = next;
-		const snapshot = JSON.stringify(next);
+		const snapshot = JSON.stringify(room);
 		saveQueue = saveQueue
 			.catch(() => undefined)
 			.then(async () => {
 				const formData = new FormData();
-				formData.set('classes', snapshot);
+				formData.set('classroom', snapshot);
 				try {
-					const response = await fetch('?/saveClassrooms', { method: 'POST', body: formData });
+					const response = await fetch('?/saveClassroom', { method: 'POST', body: formData });
 					if (!response.ok) flash('Could not save class changes');
 				} catch {
 					flash('Could not save class changes');
@@ -72,11 +70,71 @@
 			});
 	}
 	function updateClass(fn: (value: Classroom) => Classroom) {
-		persist(classes.map((c) => (c.id === activeId ? fn(c) : c)));
+		if (!activeClass.id) return;
+		const updated = fn(activeClass);
+		persist(
+			classes.map((c) => (c.id === activeId ? updated : c)),
+			updated
+		);
 	}
 	function flash(message: string) {
 		notice = message;
 		setTimeout(() => (notice = ''), 2000);
+	}
+	function draftSnapshot() {
+		return JSON.stringify({ name, term, description, itemType, details, summary, body });
+	}
+	function markDraft() {
+		initialDraft = draftSnapshot();
+	}
+	function closeModal() {
+		if (
+			modal !== 'preview' &&
+			draftSnapshot() !== initialDraft &&
+			!confirm('Discard your unsaved changes?')
+		)
+			return;
+		modal = null;
+	}
+	function trapDialog(node: HTMLElement) {
+		const previousFocus =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		const focusableSelector =
+			'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
+		queueMicrotask(() => node.querySelector<HTMLElement>(focusableSelector)?.focus());
+		function onKeydown(event: KeyboardEvent) {
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				closeModal();
+				return;
+			}
+			if (event.key !== 'Tab') return;
+			const focusable = [...node.querySelectorAll<HTMLElement>(focusableSelector)];
+			if (!focusable.length) return;
+			const first = focusable[0];
+			const last = focusable.at(-1)!;
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
+		}
+		node.addEventListener('keydown', onKeydown);
+		return {
+			destroy() {
+				node.removeEventListener('keydown', onKeydown);
+				previousFocus?.focus();
+			}
+		};
+	}
+	function handleTabKey(event: KeyboardEvent) {
+		if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+		cmsView = event.key === 'ArrowLeft' ? 'write' : 'preview';
+		(event.currentTarget as HTMLElement).parentElement
+			?.querySelector<HTMLElement>(`#${cmsView}-tab`)
+			?.focus();
 	}
 	function switchClass() {
 		selectedId = activeClass.modules[0]?.id ?? '';
@@ -86,12 +144,14 @@
 		name = '';
 		term = '';
 		description = '';
+		markDraft();
 		modal = 'class';
 	}
 	function openModule(value?: Module) {
 		editingId = value?.id ?? null;
 		name = value?.title ?? '';
 		description = value?.description ?? '';
+		markDraft();
 		modal = 'module';
 	}
 	function openItem(value?: Item, forceQuiz = false) {
@@ -102,6 +162,7 @@
 		summary = value?.summary ?? '';
 		body = value?.body ?? '';
 		cmsView = 'write';
+		markDraft();
 		modal = 'content';
 	}
 	function insertBlock(before: string, after = '') {
@@ -118,26 +179,35 @@
 		name = activeClass.name;
 		term = activeClass.term;
 		description = activeClass.description;
+		markDraft();
 		modal = 'settings';
 	}
 
 	function submitClass(event: SubmitEvent) {
 		event.preventDefault();
 		const id = crypto.randomUUID();
-		const code =
-			`${name.replace(/[^a-z0-9]/gi, '').slice(0, 3)}${Math.floor(100 + Math.random() * 900)}`.toUpperCase();
-		persist([
-			...classes,
-			{
-				id,
-				name: name.trim(),
-				term: term.trim(),
-				code,
-				description: description.trim(),
-				published: false,
-				modules: []
-			}
-		]);
+		const prefix = name
+			.replace(/[^a-z0-9]/gi, '')
+			.slice(0, 3)
+			.toUpperCase()
+			.padEnd(3, 'X');
+		const random = crypto
+			.getRandomValues(new Uint32Array(1))[0]
+			.toString(36)
+			.slice(0, 4)
+			.toUpperCase();
+		const code = `${prefix}${random}`.slice(0, 7);
+		const created: Classroom = {
+			id,
+			name: name.trim(),
+			term: term.trim(),
+			code,
+			description: description.trim(),
+			published: false,
+			studentCount: 0,
+			modules: []
+		};
+		persist([...classes, created], created);
 		activeId = id;
 		selectedId = '';
 		section = 'setup';
@@ -230,13 +300,18 @@
 		flash('Module deleted');
 	}
 	async function copyCode() {
-		await navigator.clipboard?.writeText(activeClass.code);
-		copied = true;
-		setTimeout(() => (copied = false), 1600);
+		try {
+			if (!navigator.clipboard) throw new Error('Clipboard is unavailable');
+			await navigator.clipboard.writeText(activeClass.code);
+			copied = true;
+			setTimeout(() => (copied = false), 1600);
+		} catch {
+			flash('Could not copy the class code');
+		}
 	}
 </script>
 
-<svelte:head><title>Admin workspace — Northstar AI</title></svelte:head>
+<svelte:head><title>Instructor workspace — Learn AI with Rojesh</title></svelte:head>
 
 <div class="shell">
 	{#if mobileOpen}<button
@@ -246,12 +321,12 @@
 			onclick={() => (mobileOpen = false)}
 		></button>{/if}
 	<aside class:open={mobileOpen}>
-		<a class="brand" href="/admin"
-			><span class="mark">N</span><span>Northstar <strong>AI</strong></span></a
+		<a class="brand" href={resolve('/admin')}
+			><span class="mark">AI</span><span>Learn <strong>AI</strong> with Rojesh</span></a
 		>
 		<p class="label">Instructor workspace</p>
 		<nav>
-			{#each [{ id: 'overview', text: 'Overview' }, { id: 'setup', text: 'Class setup' }, { id: 'students', text: 'Students' }, { id: 'settings', text: 'Settings' }] as item}
+			{#each [{ id: 'overview', text: 'Overview' }, { id: 'setup', text: 'Class setup' }, { id: 'students', text: 'Students' }, { id: 'settings', text: 'Settings' }] as item (item.id)}
 				<button
 					type="button"
 					class:active={section === item.id}
@@ -267,7 +342,7 @@
 				id="class-select"
 				bind:value={activeId}
 				onchange={switchClass}
-				>{#each classes as c}<option value={c.id}>{c.name}</option>{/each}</select
+				>{#each classes as c (c.id)}<option value={c.id}>{c.name}</option>{/each}</select
 			><button type="button" onclick={openClass}>+ Create new class</button>
 		</div>
 		<div class="profile">
@@ -289,21 +364,32 @@
 				<h1>{activeClass.name}</h1>
 			</div>
 			<div class="actions">
-				<button type="button" class="secondary" onclick={() => (modal = 'preview')}
-					>Preview as student</button
+				<button
+					disabled={!activeClass.id}
+					type="button"
+					class="secondary"
+					onclick={() => (modal = 'preview')}>Preview as student</button
 				><button
 					type="button"
 					class="primary"
+					disabled={!activeClass.id}
 					onclick={() => {
+						const wasPublished = activeClass.published;
 						updateClass((c) => ({ ...c, published: !c.published }));
-						flash(activeClass.published ? 'Class unpublished' : 'Class published');
+						flash(wasPublished ? 'Class unpublished' : 'Class published');
 					}}>{activeClass.published ? 'Published ✓' : 'Publish class'}</button
 				>
 			</div>
 		</header>
 		{#if notice}<div class="toast" role="status">{notice}</div>{/if}
 		<section class="content">
-			{#if section === 'overview'}
+			{#if !activeClass.id}
+				<div class="card empty-class">
+					<h2>Create your first classroom.</h2>
+					<p>Add a classroom before building modules and lessons.</p>
+					<button type="button" class="primary" onclick={openClass}>Create classroom</button>
+				</div>
+			{:else if section === 'overview'}
 				<div class="title">
 					<span>Overview</span>
 					<h2>Your class at a glance.</h2>
@@ -312,7 +398,7 @@
 				<div class="stats">
 					<article><strong>{activeClass.modules.length}</strong><span>Modules</span></article>
 					<article><strong>{itemCount}</strong><span>Content items</span></article>
-					<article><strong>18</strong><span>Students</span></article>
+					<article><strong>{activeClass.studentCount}</strong><span>Students</span></article>
 				</div>
 				<div class="card row">
 					<div>
@@ -334,7 +420,7 @@
 					<p>Students join using <strong>{activeClass.code}</strong>.</p>
 				</div>
 				<div class="card">
-					<h3>18 students enrolled</h3>
+					<h3>{activeClass.studentCount} students enrolled</h3>
 					<p>Share the class code to invite more students.</p>
 					<button type="button" class="secondary" onclick={copyCode}
 						>{copied ? 'Code copied' : 'Copy invite code'}</button
@@ -379,7 +465,7 @@
 				<div class="code">
 					<div>
 						<span>Student class code</span><strong>{activeClass.code}</strong><small
-							>18 students have joined</small
+							>{activeClass.studentCount} students have joined</small
 						>
 					</div>
 					<button type="button" onclick={copyCode}>{copied ? 'Copied!' : 'Copy code'}</button>
@@ -473,18 +559,17 @@
 {#if modal && modal !== 'preview'}<div
 		class="backdrop"
 		role="presentation"
-		onclick={(e) => e.currentTarget === e.target && (modal = null)}
+		onclick={(e) => e.currentTarget === e.target && closeModal()}
 	>
 		<div
 			class:cms={modal === 'content'}
 			class="modal"
+			use:trapDialog
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="dialog-title"
 		>
-			<button type="button" class="close" aria-label="Close" onclick={() => (modal = null)}
-				>×</button
-			>
+			<button type="button" class="close" aria-label="Close" onclick={closeModal}>×</button>
 			{#if modal === 'class'}<span>New classroom</span>
 				<h2 id="dialog-title">Create a class</h2>
 				<form onsubmit={submitClass}>
@@ -509,80 +594,101 @@
 							<h2 id="dialog-title">{editingId ? 'Edit class content' : 'Create class content'}</h2>
 						</div>
 						<div class="cms-actions">
-							<button type="button" class="secondary" onclick={() => (modal = null)}>Cancel</button
-							><button class="primary" type="submit">Save content</button>
+							<button type="button" class="secondary" onclick={closeModal}>Cancel</button><button
+								class="primary"
+								type="submit">Save content</button
+							>
 						</div>
 					</div>
 					<div class="cms-layout">
 						<section class="cms-editor">
 							<div class="cms-tabs" role="tablist" aria-label="Content editor view">
 								<button
+									id="write-tab"
 									type="button"
 									role="tab"
 									aria-selected={cmsView === 'write'}
+									aria-controls="write-panel"
+									tabindex={cmsView === 'write' ? 0 : -1}
 									class:active={cmsView === 'write'}
+									onkeydown={handleTabKey}
 									onclick={() => (cmsView = 'write')}>Write</button
 								>
 								<button
+									id="preview-tab"
 									type="button"
 									role="tab"
 									aria-selected={cmsView === 'preview'}
+									aria-controls="preview-panel"
+									tabindex={cmsView === 'preview' ? 0 : -1}
 									class:active={cmsView === 'preview'}
+									onkeydown={handleTabKey}
 									onclick={() => (cmsView = 'preview')}>Preview</button
 								>
 							</div>
 							{#if cmsView === 'write'}
-								<label
-									>Content title<input
-										required
-										bind:value={name}
-										placeholder="Give this lesson a clear title"
-									/></label
-								>
-								<label
-									>Short summary<textarea
-										class="summary-field"
-										bind:value={summary}
-										placeholder="What will students learn?"></textarea></label
-								>
-								<div class="body-label">
-									<label for="content-body">Lesson content</label><span
-										>{body.length} characters</span
+								<div id="write-panel" role="tabpanel" aria-labelledby="write-tab">
+									<label
+										>Content title<input
+											required
+											bind:value={name}
+											placeholder="Give this lesson a clear title"
+										/></label
 									>
+									<label
+										>Short summary<textarea
+											class="summary-field"
+											bind:value={summary}
+											placeholder="What will students learn?"></textarea></label
+									>
+									<div class="body-label">
+										<label for="content-body">Lesson content</label><span
+											>{body.length} characters</span
+										>
+									</div>
+									<div class="toolbar" aria-label="Formatting tools">
+										<button type="button" title="Heading" onclick={() => insertBlock('## ')}
+											>Heading</button
+										>
+										<button type="button" title="Bold" onclick={() => insertBlock('**', '**')}
+											><b>Bold</b></button
+										>
+										<button type="button" title="Bullet list" onclick={() => insertBlock('- ')}
+											>List</button
+										>
+										<button
+											type="button"
+											title="Link"
+											onclick={() => insertBlock('[', '](https://)')}>Link</button
+										>
+										<button type="button" title="Callout" onclick={() => insertBlock('> ')}
+											>Callout</button
+										>
+									</div>
+									<textarea
+										id="content-body"
+										class="body-field"
+										bind:this={bodyField}
+										bind:value={body}
+										placeholder="Write the lesson here. Use the toolbar for simple formatting."
+									></textarea>
 								</div>
-								<div class="toolbar" aria-label="Formatting tools">
-									<button type="button" title="Heading" onclick={() => insertBlock('## ')}
-										>Heading</button
-									>
-									<button type="button" title="Bold" onclick={() => insertBlock('**', '**')}
-										><b>Bold</b></button
-									>
-									<button type="button" title="Bullet list" onclick={() => insertBlock('- ')}
-										>List</button
-									>
-									<button type="button" title="Link" onclick={() => insertBlock('[', '](https://)')}
-										>Link</button
-									>
-									<button type="button" title="Callout" onclick={() => insertBlock('> ')}
-										>Callout</button
-									>
-								</div>
-								<textarea
-									id="content-body"
-									class="body-field"
-									bind:this={bodyField}
-									bind:value={body}
-									placeholder="Write the lesson here. Use the toolbar for simple formatting."
-								></textarea>
 							{:else}
-								<article class="content-preview">
+								<div
+									id="preview-panel"
+									class="content-preview"
+									role="tabpanel"
+									aria-labelledby="preview-tab"
+								>
 									<span>{itemType}</span>
 									<h1>{name || 'Untitled content'}</h1>
 									{#if summary}<p class="lead">{summary}</p>{/if}
 									<div class="preview-body">
+										<!-- The local renderer escapes HTML and validates link protocols. -->
+										<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 										{@html renderMarkdown(body || 'Start writing to preview your lesson content.')}
 									</div>
-								</article>
+								</div>
 							{/if}
 						</section>
 						<aside class="cms-sidebar">
@@ -590,8 +696,8 @@
 							<label
 								>Content type<select bind:value={itemType}
 									><option>Article</option><option>Video</option><option>Activity</option><option
-										>Quiz</option
-									></select
+										>Project</option
+									><option>Quiz</option></select
 								></label
 							>
 							<label
@@ -628,13 +734,19 @@
 		</div>
 	</div>
 {:else if modal === 'preview'}<div class="backdrop">
-		<div class="modal preview" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-			<button type="button" class="close" aria-label="Close" onclick={() => (modal = null)}
-				>×</button
-			><span>Student preview</span>
+		<div
+			class="modal preview"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="preview-title"
+			use:trapDialog
+		>
+			<button type="button" class="close" aria-label="Close" onclick={closeModal}>×</button><span
+				>Student preview</span
+			>
 			<h2 id="preview-title">{activeClass.name}</h2>
 			<p>{activeClass.description}</p>
-			{#each activeClass.modules as module, index}<article>
+			{#each activeClass.modules as module, index (module.id)}<article>
 					<strong>{index + 1}. {module.title}</strong><small
 						>{module.items.length} learning items</small
 					>
@@ -681,8 +793,8 @@
 	}
 	.label {
 		margin: 3rem 0.5rem 0.8rem;
-		color: #8a9089;
-		font-size: 0.62rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 		font-weight: 800;
 		letter-spacing: 0.15em;
 		text-transform: uppercase;
@@ -937,13 +1049,13 @@
 	}
 	.reorder {
 		display: flex;
-		width: 2.3rem;
+		width: 2.75rem;
 		flex-direction: column;
 		justify-content: center;
 		border-right: 1px solid #e4e3dc;
 	}
 	.reorder button {
-		height: 2rem;
+		height: 2.75rem;
 		border: 0;
 		background: transparent;
 	}
@@ -1153,8 +1265,8 @@
 		border-bottom: 1px solid #e2e1da;
 	}
 	.settings dt {
-		color: #888;
-		font-size: 0.65rem;
+		color: #5f675f;
+		font-size: 0.75rem;
 	}
 	.settings dd {
 		margin: 0.3rem 0 0;
@@ -1271,10 +1383,10 @@
 		border-bottom-color: #183f2a;
 		color: #183f2a;
 	}
-	.cms-editor > label {
+	#write-panel > label {
 		margin-bottom: 1rem;
 	}
-	.cms-editor > label:first-of-type input {
+	#write-panel > label:first-of-type input {
 		min-height: 3.5rem;
 		font:
 			500 1.1rem Georgia,
@@ -1309,7 +1421,7 @@
 		background: #f2f0e9;
 	}
 	.toolbar button {
-		min-height: 2.25rem;
+		min-height: 2.75rem;
 		padding: 0 0.65rem;
 		border: 1px solid transparent;
 		border-radius: 0.35rem;
