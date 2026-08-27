@@ -36,7 +36,7 @@ async function getClassroomById(d1: D1Database, classroomId: string) {
 			module = { ...row.module, lessons: [] };
 			modules.set(row.module.id, module);
 		}
-		if (row.lesson) module.lessons.push(row.lesson);
+		if (row.lesson) module.lessons.push({ ...row.lesson, quiz: row.lesson.quiz ?? undefined });
 	}
 
 	const renderedModules = await Promise.all(

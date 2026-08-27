@@ -15,6 +15,7 @@
 		AdminModule as Module
 	} from '$lib/types/admin';
 	import type { PageData } from './$types';
+	import type { QuizConfig } from '$lib/types/quiz';
 	let { data }: { data: PageData } = $props();
 	let section = $state<AdminSection>('setup');
 	let modal = $state<Modal>(null);
@@ -31,6 +32,7 @@
 	let details = $state('');
 	let summary = $state('');
 	let body = $state('');
+	let quiz = $state<QuizConfig>({ passingScore: 70, questions: [] });
 	let initialDraft = $state('');
 	let cmsView = $state<'write' | 'preview'>('write');
 	let bodyField = $state<HTMLTextAreaElement>();
@@ -88,7 +90,7 @@
 		setTimeout(() => (notice = ''), 2000);
 	}
 	function draftSnapshot() {
-		return JSON.stringify({ name, term, description, itemType, details, summary, body });
+		return JSON.stringify({ name, term, description, itemType, details, summary, body, quiz });
 	}
 	function markDraft() {
 		initialDraft = draftSnapshot();
@@ -167,6 +169,7 @@
 		details = value?.details ?? '';
 		summary = value?.summary ?? '';
 		body = value?.body ?? '';
+		quiz = structuredClone(value?.quiz ?? { passingScore: 70, questions: [] });
 		cmsView = 'write';
 		markDraft();
 		modal = 'content';
@@ -224,6 +227,16 @@
 	function submitModule(event: SubmitEvent) {
 		event.preventDefault();
 		const id = editingId ?? crypto.randomUUID();
+		if (
+			itemType === 'Quiz' &&
+			(!quiz.questions.length ||
+				quiz.questions.some(
+					(q) => !q.prompt.trim() || !q.answers.length || q.answers.some((answer) => !answer.trim())
+				))
+		) {
+			flash('Add questions and mark a correct answer for each');
+			return;
+		}
 		updateClass((c) => ({
 			...c,
 			modules: editingId
@@ -255,7 +268,8 @@
 													type: itemType,
 													details: details.trim(),
 													summary: summary.trim(),
-													body: body.trim()
+													body: body.trim(),
+													quiz: itemType === 'Quiz' ? quiz : undefined
 												}
 											: i
 									)
@@ -267,7 +281,8 @@
 											type: itemType,
 											details: details.trim(),
 											summary: summary.trim(),
-											body: body.trim()
+											body: body.trim(),
+											quiz: itemType === 'Quiz' ? quiz : undefined
 										}
 									]
 						}
@@ -460,6 +475,7 @@
 	bind:details
 	bind:summary
 	bind:body
+	bind:quiz
 	bind:cmsView
 	bind:bodyField
 	{closeModal}

@@ -92,7 +92,8 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 					row.lesson.details ||
 					(row.lesson.durationMinutes ? `${row.lesson.durationMinutes} min` : ''),
 				summary: row.lesson.summary,
-				body: row.lesson.content.join('\n\n')
+				body: row.lesson.content.join('\n\n'),
+				quiz: row.lesson.quiz ?? undefined
 			});
 		}
 	}
@@ -109,7 +110,9 @@ function isLesson(value: unknown): value is AdminLesson {
 		['Article', 'Video', 'Activity', 'Project', 'Quiz'].includes(item.type ?? '') &&
 		typeof item.details === 'string' &&
 		typeof item.summary === 'string' &&
-		typeof item.body === 'string'
+		typeof item.body === 'string' &&
+		(item.quiz === undefined ||
+			(typeof item.quiz === 'object' && item.quiz !== null && Array.isArray(item.quiz.questions)))
 	);
 }
 
@@ -332,11 +335,11 @@ export const actions: Actions = {
 				statements.push(
 					database
 						.prepare(
-							`INSERT INTO lesson (id, module_id, title, type, summary, content, details, duration_minutes, position)
-							 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+							`INSERT INTO lesson (id, module_id, title, type, summary, content, details, duration_minutes, quiz, position)
+							 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 							 ON CONFLICT(id) DO UPDATE SET module_id = excluded.module_id, title = excluded.title,
 							 type = excluded.type, summary = excluded.summary, content = excluded.content,
-							 details = excluded.details, duration_minutes = excluded.duration_minutes,
+							 details = excluded.details, duration_minutes = excluded.duration_minutes, quiz = excluded.quiz,
 							 position = excluded.position`
 						)
 						.bind(
@@ -353,6 +356,7 @@ export const actions: Actions = {
 							),
 							item.details.trim(),
 							durationFromDetails(item.details),
+							item.type === 'Quiz' && item.quiz ? JSON.stringify(item.quiz) : null,
 							itemIndex + 1
 						)
 				);

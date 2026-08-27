@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { LessonContent, ModuleContent } from '$lib/types/classroom';
+	import QuizPlayer from './QuizPlayer.svelte';
 
 	let {
 		classroomId,
@@ -50,6 +51,7 @@
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html lesson?.renderedContent ?? ''}
 		</div>
+		{#if lesson?.type === 'quiz' && lesson.quiz}<QuizPlayer quiz={lesson.quiz} />{/if}
 		{#if lesson?.id === 'lesson_attention'}<figure>
 				<div class="concept-visual" aria-label="The word bank connecting most strongly to river">
 					<div class="word">bank</div>

@@ -1,3 +1,5 @@
+import type { QuizConfig } from '$lib/types/quiz';
+
 export type LessonContent = {
 	id: string;
 	title: string;
@@ -7,6 +9,7 @@ export type LessonContent = {
 	renderedContent?: string;
 	durationMinutes: number;
 	position: number;
+	quiz?: QuizConfig;
 };
 
 export type ModuleContent = {

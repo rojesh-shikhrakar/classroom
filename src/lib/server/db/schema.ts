@@ -63,6 +63,7 @@ export const lesson = sqliteTable(
 		content: text('content', { mode: 'json' }).$type<string[]>().notNull().default([]),
 		details: text('details').notNull().default(''),
 		durationMinutes: integer('duration_minutes').notNull().default(0),
+		quiz: text('quiz', { mode: 'json' }).$type<import('$lib/types/quiz').QuizConfig | null>(),
 		position: integer('position').notNull()
 	},
 	(table) => [

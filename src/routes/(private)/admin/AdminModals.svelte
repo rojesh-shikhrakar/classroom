@@ -2,6 +2,8 @@
 	import { renderMarkdown } from '$lib/markdown';
 	import type { AdminClassroom, AdminLesson, AdminModule } from '$lib/types/admin';
 	import type { AdminModal } from './types';
+	import type { QuizConfig } from '$lib/types/quiz';
+	import QuizBuilder from './QuizBuilder.svelte';
 
 	let {
 		modal,
@@ -15,6 +17,7 @@
 		details = $bindable(),
 		summary = $bindable(),
 		body = $bindable(),
+		quiz = $bindable(),
 		cmsView = $bindable(),
 		bodyField = $bindable(),
 		closeModal,
@@ -37,6 +40,7 @@
 		details: string;
 		summary: string;
 		body: string;
+		quiz: QuizConfig;
 		cmsView: 'write' | 'preview';
 		bodyField?: HTMLTextAreaElement;
 		closeModal: () => void;
@@ -135,6 +139,7 @@
 											bind:value={summary}
 											placeholder="What will students learn?"></textarea></label
 									>
+									{#if itemType === 'Quiz'}<QuizBuilder bind:quiz />{/if}
 									<div class="body-label">
 										<label for="content-body">Lesson content</label><span
 											>{body.length} characters</span

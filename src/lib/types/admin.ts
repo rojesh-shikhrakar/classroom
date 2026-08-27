@@ -1,3 +1,5 @@
+import type { QuizConfig } from '$lib/types/quiz';
+
 export type AdminLesson = {
 	id: string;
 	title: string;
@@ -5,6 +7,7 @@ export type AdminLesson = {
 	details: string;
 	summary: string;
 	body: string;
+	quiz?: QuizConfig;
 };
 
 export type AdminModule = {
