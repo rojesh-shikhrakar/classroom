@@ -1,9 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { asc, count, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import { isAdmin } from '$lib/server/admin';
 import { normalizeClassCode } from '$lib/server/classrooms';
 import { getDb } from '$lib/server/db';
 import { classroom, classroomEnrollment, courseModule, lesson } from '$lib/server/db/schema';
+import { user } from '$lib/server/db/auth.schema';
 import type { AdminClassroom, AdminLesson } from '$lib/types/admin';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -29,12 +30,16 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 			.leftJoin(lesson, eq(lesson.moduleId, courseModule.id))
 			.orderBy(asc(courseModule.position), asc(lesson.position)),
 		db
-			.select({ classroomId: classroomEnrollment.classroomId, total: count() })
+			.select({
+				classroomId: classroomEnrollment.classroomId,
+				joinedAt: classroomEnrollment.joinedAt,
+				student: { id: user.id, name: user.name, email: user.email }
+			})
 			.from(classroomEnrollment)
-			.groupBy(classroomEnrollment.classroomId)
+			.innerJoin(user, eq(user.id, classroomEnrollment.userId))
+			.orderBy(asc(classroomEnrollment.joinedAt))
 	]);
 
-	const counts = new Map(enrollmentRows.map((row) => [row.classroomId, row.total]));
 	const classes = new Map<string, AdminClassroom>();
 	for (const room of classRows) {
 		classes.set(room.id, {
@@ -44,9 +49,19 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 			code: room.code,
 			description: room.description,
 			published: room.published,
-			studentCount: counts.get(room.id) ?? 0,
+			studentCount: 0,
+			students: [],
 			modules: []
 		});
+	}
+	for (const enrollment of enrollmentRows) {
+		const room = classes.get(enrollment.classroomId);
+		if (!room) continue;
+		room.students.push({
+			...enrollment.student,
+			joinedAt: enrollment.joinedAt.toISOString()
+		});
+		room.studentCount = room.students.length;
 	}
 
 	const modules = new Map<string, AdminClassroom['modules'][number]>();
@@ -130,6 +145,61 @@ function durationFromDetails(details: string) {
 }
 
 export const actions: Actions = {
+	removeStudent: async ({ locals, platform, request }) => {
+		if (!locals.user) redirect(303, '/login');
+		if (!(await isAdmin(platform, locals.user.id, locals.user.email))) {
+			return fail(403, { error: 'You do not have permission to remove students.' });
+		}
+
+		const formData = await request.formData();
+		const classroomId = formData.get('classroomId');
+		const studentId = formData.get('studentId');
+		if (
+			typeof classroomId !== 'string' ||
+			!classroomId ||
+			typeof studentId !== 'string' ||
+			!studentId
+		) {
+			return fail(400, { error: 'Classroom and student identifiers are required.' });
+		}
+
+		try {
+			await getDb(requireDatabase(platform))
+				.delete(classroomEnrollment)
+				.where(
+					and(
+						eq(classroomEnrollment.classroomId, classroomId),
+						eq(classroomEnrollment.userId, studentId)
+					)
+				);
+		} catch (error) {
+			console.error('Student removal failed', error);
+			return fail(500, { error: 'The student could not be removed.' });
+		}
+
+		return { removed: true, classroomId, studentId };
+	},
+	deleteClassroom: async ({ locals, platform, request }) => {
+		if (!locals.user) redirect(303, '/login');
+		if (!(await isAdmin(platform, locals.user.id, locals.user.email))) {
+			return fail(403, { error: 'You do not have permission to delete classrooms.' });
+		}
+
+		const classroomId = (await request.formData()).get('classroomId');
+		if (typeof classroomId !== 'string' || !classroomId) {
+			return fail(400, { error: 'Classroom identifier is missing.' });
+		}
+
+		const database = requireDatabase(platform);
+		try {
+			await getDb(database).delete(classroom).where(eq(classroom.id, classroomId));
+		} catch (error) {
+			console.error('Classroom deletion failed', error);
+			return fail(500, { error: 'The class could not be deleted.' });
+		}
+
+		return { deleted: true, classroomId };
+	},
 	saveClassroom: async ({ locals, platform, request }) => {
 		if (!locals.user) redirect(303, '/login');
 		if (!(await isAdmin(platform, locals.user.id, locals.user.email))) {

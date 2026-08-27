@@ -10,7 +10,8 @@
 		onOpenModule,
 		onMoveModule,
 		onRemoveModule,
-		onOpenItem
+		onOpenItem,
+		onRemoveItem
 	}: {
 		classroom: AdminClassroom;
 		selectedModule?: AdminModule;
@@ -22,6 +23,7 @@
 		onMoveModule: (index: number, direction: 1 | -1) => void;
 		onRemoveModule: () => void;
 		onOpenItem: (item?: AdminLesson, forceQuiz?: boolean) => void;
+		onRemoveItem: (item: AdminLesson) => void;
 	} = $props();
 </script>
 
@@ -97,13 +99,18 @@
 				</div>
 			</div>
 			<div class="items">
-				{#each selectedModule.items as item, index (item.id)}<button
-						type="button"
-						onclick={() => onOpenItem(item)}
-						><i class:quiz={item.type === 'Quiz'}>{item.type === 'Quiz' ? '?' : index + 1}</i><span
-							><strong>{item.title}</strong><small>{item.type} · {item.details}</small></span
-						><em>Edit ›</em></button
-					>{/each}
+				{#each selectedModule.items as item, index (item.id)}<div class="item-row">
+						<button type="button" class="item-main" onclick={() => onOpenItem(item)}
+							><i class:quiz={item.type === 'Quiz'}>{item.type === 'Quiz' ? '?' : index + 1}</i
+							><span><strong>{item.title}</strong><small>{item.type} · {item.details}</small></span
+							><em>Edit ›</em></button
+						><button
+							type="button"
+							class="item-delete"
+							aria-label={`Delete ${item.title}`}
+							onclick={() => onRemoveItem(item)}>Delete</button
+						>
+					</div>{/each}
 			</div>
 			<button type="button" class="add" onclick={() => onOpenItem()}
 				><b>+</b><span

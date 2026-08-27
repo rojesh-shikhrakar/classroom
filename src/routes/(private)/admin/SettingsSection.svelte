@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { AdminClassroom } from '$lib/types/admin';
-	let { classroom, onEdit }: { classroom: AdminClassroom; onEdit: () => void } = $props();
+	let {
+		classroom,
+		onEdit,
+		onDelete
+	}: { classroom: AdminClassroom; onEdit: () => void; onDelete: () => void } = $props();
 </script>
 
 <div class="title">
@@ -28,4 +32,11 @@
 		</div>
 	</dl>
 	<button type="button" class="primary" onclick={onEdit}>Edit settings</button>
+</div>
+<div class="card danger-zone">
+	<div>
+		<h3>Delete class</h3>
+		<p>Permanently delete this class, including all modules, content, enrollments, and progress.</p>
+	</div>
+	<button type="button" class="danger" onclick={onDelete}>Delete class</button>
 </div>

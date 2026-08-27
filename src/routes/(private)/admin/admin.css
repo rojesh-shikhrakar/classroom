@@ -373,6 +373,19 @@ header h1 {
 	color: inherit;
 	text-align: left;
 }
+.items .item-row {
+	display: flex;
+	align-items: stretch;
+	gap: 0.5rem;
+}
+.items .item-main {
+	flex: 1;
+}
+.items .item-delete {
+	width: auto;
+	padding: 0 0.9rem;
+	color: #b42318;
+}
 .items i {
 	display: grid;
 	width: 1.8rem;
@@ -519,6 +532,82 @@ header h1 {
 }
 .settings > .primary {
 	margin-top: 1rem;
+}
+.danger-zone {
+	margin-top: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	border-color: #fecdca;
+}
+.danger-zone h3,
+.danger-zone p {
+	margin: 0;
+}
+.danger-zone p {
+	margin-top: 0.35rem;
+	color: var(--muted);
+}
+.danger-zone .danger {
+	flex: 0 0 auto;
+	background: #fff;
+	color: #b42318;
+	border-color: #fda29b;
+}
+.student-list {
+	padding: 0;
+	overflow: hidden;
+}
+.student-list-head,
+.student-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 10rem 6rem;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+}
+.student-list-head {
+	background: #f7f6f1;
+	color: #667067;
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+.student-row + .student-row {
+	border-top: 1px solid #e2e1da;
+}
+.student-identity {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 0;
+}
+.student-identity > span {
+	display: grid;
+	width: 2.25rem;
+	height: 2.25rem;
+	flex: 0 0 auto;
+	place-items: center;
+	border-radius: 50%;
+	background: #e8eee7;
+	font-weight: 700;
+}
+.student-identity strong,
+.student-identity small {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.student-identity small,
+.student-row time {
+	color: #667067;
+	font-size: 0.8rem;
+}
+.student-row .danger {
+	background: #fff;
+	color: #b42318;
+	border-color: #fda29b;
 }
 .toast {
 	position: fixed;
@@ -825,6 +914,24 @@ header h1 {
 	}
 }
 @media (max-width: 760px) {
+	.student-list-head {
+		display: none;
+	}
+	.student-row {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+	.student-row time {
+		grid-column: 1;
+		padding-left: 3rem;
+	}
+	.student-row .danger {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+	}
+	.danger-zone {
+		align-items: flex-start;
+		flex-direction: column;
+	}
 	.shell {
 		display: block;
 	}

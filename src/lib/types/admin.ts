@@ -14,6 +14,13 @@ export type AdminModule = {
 	items: AdminLesson[];
 };
 
+export type AdminStudent = {
+	id: string;
+	name: string;
+	email: string;
+	joinedAt: string;
+};
+
 export type AdminClassroom = {
 	id: string;
 	name: string;
@@ -22,5 +29,6 @@ export type AdminClassroom = {
 	description: string;
 	published: boolean;
 	studentCount: number;
+	students: AdminStudent[];
 	modules: AdminModule[];
 };

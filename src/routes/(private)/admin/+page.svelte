@@ -45,6 +45,7 @@
 		description: '',
 		published: false,
 		studentCount: 0,
+		students: [],
 		modules: []
 	};
 	const initialClasses = untrack(() => data.classes);
@@ -210,6 +211,7 @@
 			description: description.trim(),
 			published: false,
 			studentCount: 0,
+			students: [],
 			modules: []
 		};
 		persist([...classes, created], created);
@@ -304,6 +306,71 @@
 		selectedId = nextId;
 		flash('Module deleted');
 	}
+	function removeItem(item: Item) {
+		if (!selectedModule || !confirm(`Delete “${item.title}”?`)) return;
+		updateClass((c) => ({
+			...c,
+			modules: c.modules.map((module) =>
+				module.id === selectedModule.id
+					? { ...module, items: module.items.filter((candidate) => candidate.id !== item.id) }
+					: module
+			)
+		}));
+		flash('Content deleted');
+	}
+	async function removeClass() {
+		if (
+			!activeClass.id ||
+			!confirm(
+				`Delete “${activeClass.name}” and all of its modules, content, enrollments, and progress? This cannot be undone.`
+			)
+		)
+			return;
+
+		const classroomId = activeClass.id;
+		await saveQueue.catch(() => undefined);
+		const formData = new FormData();
+		formData.set('classroomId', classroomId);
+		try {
+			const response = await fetch('?/deleteClassroom', { method: 'POST', body: formData });
+			if (!response.ok) {
+				flash('Could not delete class');
+				return;
+			}
+			classes = classes.filter((classroom) => classroom.id !== classroomId);
+			activeId = classes[0]?.id ?? '';
+			selectedId = classes[0]?.modules[0]?.id ?? '';
+			section = classes.length ? 'setup' : 'overview';
+			flash('Class deleted');
+		} catch {
+			flash('Could not delete class');
+		}
+	}
+	async function removeStudent(studentId: string, studentName: string) {
+		if (!activeClass.id || !confirm(`Remove ${studentName} from “${activeClass.name}”?`)) return;
+		const formData = new FormData();
+		formData.set('classroomId', activeClass.id);
+		formData.set('studentId', studentId);
+		try {
+			const response = await fetch('?/removeStudent', { method: 'POST', body: formData });
+			if (!response.ok) {
+				flash('Could not remove student');
+				return;
+			}
+			classes = classes.map((room) =>
+				room.id === activeClass.id
+					? {
+							...room,
+							studentCount: Math.max(0, room.studentCount - 1),
+							students: room.students.filter((student) => student.id !== studentId)
+						}
+					: room
+			);
+			flash('Student removed');
+		} catch {
+			flash('Could not remove student');
+		}
+	}
 	async function copyCode() {
 		try {
 			if (!navigator.clipboard) throw new Error('Clipboard is unavailable');
@@ -354,9 +421,14 @@
 					onOpenSetup={() => (section = 'setup')}
 				/>
 			{:else if section === 'students'}
-				<StudentsSection classroom={activeClass} {copied} onCopyCode={copyCode} />
+				<StudentsSection
+					classroom={activeClass}
+					{copied}
+					onCopyCode={copyCode}
+					onRemoveStudent={removeStudent}
+				/>
 			{:else if section === 'settings'}
-				<SettingsSection classroom={activeClass} onEdit={openSettings} />
+				<SettingsSection classroom={activeClass} onEdit={openSettings} onDelete={removeClass} />
 			{:else}
 				<ClassSetupSection
 					classroom={activeClass}
@@ -369,6 +441,7 @@
 					onMoveModule={move}
 					onRemoveModule={removeModule}
 					onOpenItem={openItem}
+					onRemoveItem={removeItem}
 				/>
 			{/if}
 		</section>
