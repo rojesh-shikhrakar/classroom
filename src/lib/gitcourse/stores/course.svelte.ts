@@ -56,7 +56,7 @@ class CourseStore {
 		this.sections = await listSections(branch);
 		const commit =
 			(commitOid && this.sections.find((s) => s.oid.startsWith(commitOid))?.oid) ??
-			this.sections[0]?.oid;
+			this.sections.at(-1)?.oid;
 		if (commit) await this.selectCommit(commit, file);
 	}
 

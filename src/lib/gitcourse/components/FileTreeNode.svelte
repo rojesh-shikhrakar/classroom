@@ -18,12 +18,12 @@
 
 <div style="padding-left: {depth * 14}px">
 	<button
-		class="flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
-		class:bg-neutral-100={node.type === 'blob' && node.path === courseStore.selectedFile}
-		class:dark:bg-neutral-800={node.type === 'blob' && node.path === courseStore.selectedFile}
+		class="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm text-[#35463a] hover:bg-[#ebe9df] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#e46035]"
+		class:bg-[#ebe9df]={node.type === 'blob' && node.path === courseStore.selectedFile}
+		class:font-semibold={node.type === 'blob' && node.path === courseStore.selectedFile}
 		onclick={toggle}
 	>
-		<span class="w-4 shrink-0 text-neutral-400">
+		<span class="w-4 shrink-0 text-[#738078]">
 			{node.type === 'tree' ? (expanded ? '▾' : '▸') : '📄'}
 		</span>
 		<span class="truncate">{node.name}</span>

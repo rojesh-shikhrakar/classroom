@@ -1087,56 +1087,55 @@ figcaption {
 
 .git-course {
 	display: flex;
+	height: 100dvh;
 	min-height: 100dvh;
 	flex-direction: column;
-	background: #fff;
+	overflow: hidden;
+	background: #fffdf8;
 	color: #17231b;
 }
 .git-course > header {
 	display: flex;
-	min-height: 72px;
+	min-height: 64px;
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	padding: 0.75rem 1.25rem;
+	padding: 0.65rem 1.25rem;
 	border-bottom: 1px solid #d9d8ce;
+	background: #f8f6ef;
 }
-.repo-heading {
-	display: flex;
+.git-course > header h1 {
 	min-width: 0;
-	align-items: center;
-	gap: 0.75rem;
-}
-.repo-heading > svg {
-	width: 1.75rem;
-	flex: 0 0 auto;
-	fill: #17231b;
-}
-.repo-heading span {
-	display: block;
-	color: #777;
-	font-size: 0.68rem;
-	font-weight: 700;
-	letter-spacing: 0.09em;
-	text-transform: uppercase;
-}
-.repo-heading h1 {
-	margin: 0.1rem 0 0;
+	margin: 0;
 	overflow: hidden;
-	font-size: 1rem;
+	color: #173e29;
+	font:
+		600 1.1rem/1.2 Georgia,
+		serif;
+	letter-spacing: -0.015em;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.repo-controls,
+.repo-controls {
+	display: flex;
+	min-width: 0;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 1rem;
+	margin-left: auto;
+}
 .repo-controls label {
 	display: flex;
+	flex: 0 0 auto;
 	align-items: center;
-	gap: 0.75rem;
+	gap: 0.5rem;
 }
 .repo-controls label > span {
 	color: #676b66;
 	font-size: 0.75rem;
+	line-height: 1;
+	white-space: nowrap;
 }
 .repo-controls button[role='switch'] {
 	position: relative;
@@ -1145,11 +1144,15 @@ figcaption {
 	padding: 0;
 	border: 0;
 	border-radius: 999px;
-	background: #c7cbc7;
+	background: #c9cbc1;
 	cursor: pointer;
 }
 .repo-controls button[role='switch'][aria-checked='true'] {
 	background: #183f2a;
+}
+.repo-controls button[role='switch']:focus-visible {
+	outline: 3px solid #e46035;
+	outline-offset: 3px;
 }
 .repo-controls button[role='switch']:disabled {
 	cursor: not-allowed;
@@ -1172,6 +1175,7 @@ figcaption {
 	display: flex;
 	min-height: 0;
 	flex: 1;
+	overflow: hidden;
 }
 .repo-state {
 	display: grid;
@@ -1220,8 +1224,7 @@ figcaption {
 }
 @media (max-width: 760px) {
 	.git-course > header {
-		align-items: flex-start;
-		flex-direction: column;
+		min-height: 60px;
 	}
 	.repo-controls {
 		width: 100%;

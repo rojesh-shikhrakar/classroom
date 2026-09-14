@@ -62,14 +62,14 @@
 	});
 </script>
 
-<div class="flex min-w-0 flex-1 flex-col overflow-y-auto">
+<div class="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#fffdf8]">
 	<div class="p-6">
 		{#if loading}
-			<p class="text-sm text-neutral-500">Loading…</p>
+			<p class="text-sm text-[#667068]">Loading…</p>
 		{:else if error}
-			<p class="text-sm text-red-600 dark:text-red-400">{error}</p>
+			<p class="text-sm text-[#b13d27]">{error}</p>
 		{:else if !courseStore.selectedFile}
-			<p class="text-sm text-neutral-500">Select a file to view its content.</p>
+			<p class="text-sm text-[#667068]">Select a file to view its content.</p>
 		{:else if bytes}
 			{#if courseStore.diffMode && canDiff}
 				<DiffRenderer oldBytes={previousBytes} newBytes={bytes} path={courseStore.selectedFile} />
@@ -84,9 +84,7 @@
 			{:else if kind === 'code'}
 				<CodeRenderer {bytes} path={courseStore.selectedFile} />
 			{:else}
-				<pre class="overflow-x-auto text-sm whitespace-pre-wrap">{new TextDecoder().decode(
-						bytes
-					)}</pre>
+				<CodeRenderer {bytes} path={courseStore.selectedFile} />
 			{/if}
 		{/if}
 	</div>

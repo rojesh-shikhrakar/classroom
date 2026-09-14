@@ -3,15 +3,15 @@
 </script>
 
 {#if courseStore.commitPanelOpen}
-	<div class="flex w-56 shrink-0 flex-col border-r border-neutral-200 dark:border-neutral-800">
+	<div class="flex w-56 shrink-0 flex-col border-r border-[#d9d8ce] bg-[#f8f6ef]">
 		<div
-			class="flex items-center justify-between border-b border-neutral-200 px-3 py-2 text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:border-neutral-800"
+			class="flex items-center justify-between border-b border-[#d9d8ce] px-3 py-2 text-xs font-bold tracking-wider text-[#667068] uppercase"
 		>
-			<span>Commits</span>
+			<span>Progression</span>
 			<button
-				class="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+				class="rounded text-[#737b74] hover:text-[#173e29] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e46035]"
 				onclick={() => courseStore.toggleCommitPanel()}
-				aria-label="Collapse commits"
+				aria-label="Collapse progression"
 			>
 				⟨
 			</button>
@@ -20,16 +20,16 @@
 			{#each [...courseStore.sections].reverse() as section (section.oid)}
 				<li>
 					<button
-						class="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
-						class:bg-neutral-100={section.oid === courseStore.selectedCommit}
-						class:dark:bg-neutral-800={section.oid === courseStore.selectedCommit}
+						class="flex w-full items-start gap-2 border-l-2 border-transparent px-3 py-2 text-left text-sm text-[#35463a] hover:bg-[#ebe9df] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#e46035]"
+						class:border-[#e46035]={section.oid === courseStore.selectedCommit}
+						class:bg-[#ebe9df]={section.oid === courseStore.selectedCommit}
 						onclick={() => courseStore.selectCommit(section.oid)}
 					>
-						<span class="mt-1.5 size-2 shrink-0 rounded-full bg-neutral-400"></span>
+						<span class="mt-1.5 size-2 shrink-0 rounded-full bg-[#738078]"></span>
 						<span>
 							<div class="font-medium">{section.title}</div>
 							{#if section.subtitle}
-								<div class="text-xs text-neutral-500">{section.subtitle}</div>
+								<div class="text-xs text-[#737b74]">{section.subtitle}</div>
 							{/if}
 						</span>
 					</button>
@@ -39,10 +39,11 @@
 	</div>
 {:else}
 	<button
-		class="w-6 shrink-0 border-r border-neutral-200 text-neutral-400 hover:text-neutral-700 dark:border-neutral-800 dark:hover:text-neutral-200"
+		class="flex w-9 shrink-0 items-center justify-center gap-2 border-r border-[#d9d8ce] bg-[#f8f6ef] py-3 text-xs font-bold tracking-wider text-[#667068] uppercase hover:bg-[#ebe9df] hover:text-[#173e29] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#e46035]"
 		onclick={() => courseStore.toggleCommitPanel()}
-		aria-label="Expand commits"
+		aria-label="Expand progression"
 	>
-		⟩
+		<span class="rotate-180 [writing-mode:vertical-rl]">Progression</span>
+		<span aria-hidden="true">⟩</span>
 	</button>
 {/if}
