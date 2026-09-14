@@ -152,6 +152,10 @@ function durationFromDetails(details: string) {
 }
 
 export const actions: Actions = {
+	signOut: async ({ locals, request }) => {
+		await locals.auth.api.signOut({ headers: request.headers });
+		redirect(303, '/');
+	},
 	removeStudent: async ({ locals, platform, request }) => {
 		if (!locals.user) redirect(303, '/login');
 		if (!(await isAdmin(platform, locals.user.id, locals.user.email))) {

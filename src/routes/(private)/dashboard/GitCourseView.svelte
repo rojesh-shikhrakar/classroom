@@ -7,7 +7,7 @@
 	import FileExplorer from '$lib/gitcourse/components/FileExplorer.svelte';
 	import ContentViewer from '$lib/gitcourse/components/ContentViewer.svelte';
 
-	let { title, repoUrl }: { title: string; repoUrl: string } = $props();
+	let { title, repoUrl, userName }: { title: string; repoUrl: string; userName: string } = $props();
 	let kind = $derived(courseStore.selectedFile ? detectKind(courseStore.selectedFile) : null);
 	let canDiff = $derived(kind !== null && kind !== 'image' && !!courseStore.previousCommitOid);
 	let repositoryTitle = $derived(
@@ -26,8 +26,8 @@
 <div class="git-course">
 	<header>
 		<h1>{repositoryTitle}</h1>
-		{#if courseStore.modules.length}
-			<div class="repo-controls">
+		<div class="repo-controls">
+			{#if courseStore.modules.length}
 				<label
 					><span>Content</span><button
 						type="button"
@@ -39,8 +39,24 @@
 					><span>Diff</span></label
 				>
 				<BranchSelector />
-			</div>
-		{/if}
+			{/if}
+			<details class="git-account-menu">
+				<summary aria-label={`Open profile menu for ${userName}`}>
+					<span aria-hidden="true">{userName.charAt(0).toUpperCase()}</span>
+				</summary>
+				<div class="git-account-submenu">
+					<div class="git-account-copy"><strong>{userName}</strong><small>Student</small></div>
+					<form method="post" action="?/signOut">
+						<button type="submit" class="git-logout-button">
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<path d="M10 17l5-5-5-5M4 12h11M15 4h4v16h-4" />
+							</svg>
+							Log out
+						</button>
+					</form>
+				</div>
+			</details>
+		</div>
 	</header>
 	{#if courseStore.loading}
 		<div class="repo-state">

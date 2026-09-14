@@ -1125,6 +1125,88 @@ figcaption {
 	gap: 1rem;
 	margin-left: auto;
 }
+.git-account-menu {
+	position: relative;
+	flex: 0 0 auto;
+}
+.git-account-menu summary {
+	display: grid;
+	width: 2.5rem;
+	height: 2.5rem;
+	place-items: center;
+	border: 1px solid #bfc8be;
+	border-radius: 50%;
+	background: #dce7d8;
+	color: #173e29;
+	font-size: 0.78rem;
+	font-weight: 800;
+	cursor: pointer;
+	list-style: none;
+}
+.git-account-menu summary::-webkit-details-marker {
+	display: none;
+}
+.git-account-menu summary:hover {
+	border-color: #738578;
+	background: #d2e1ce;
+}
+.git-account-menu[open] summary {
+	box-shadow: 0 0 0 3px #e8542d26;
+}
+.git-account-submenu {
+	position: absolute;
+	top: calc(100% + 0.65rem);
+	right: 0;
+	z-index: 50;
+	width: 13.5rem;
+	padding: 0.65rem;
+	border: 1px solid #d2d2c8;
+	border-radius: 0.75rem;
+	background: #fffdf8;
+	box-shadow: 0 16px 36px #26342b24;
+}
+.git-account-copy {
+	padding: 0.45rem 0.55rem 0.65rem;
+	border-bottom: 1px solid #e3e1d8;
+}
+.git-account-copy strong,
+.git-account-copy small {
+	display: block;
+}
+.git-account-copy strong {
+	overflow: hidden;
+	font-size: 0.78rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.git-account-copy small {
+	margin-top: 0.2rem;
+	color: #7d847e;
+	font-size: 0.65rem;
+}
+.git-account-submenu form {
+	margin-top: 0.45rem;
+}
+.git-logout-button {
+	display: flex;
+	width: 100%;
+	min-height: 2.5rem;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0 0.55rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: transparent;
+	color: #8f3426;
+	font-size: 0.72rem;
+	font-weight: 750;
+}
+.git-logout-button:hover {
+	background: #f8e9e4;
+}
+.git-logout-button svg {
+	width: 1rem;
+}
 .repo-controls label {
 	display: flex;
 	flex: 0 0 auto;

@@ -240,8 +240,107 @@ header h1 {
 }
 .actions {
 	display: flex;
+	align-items: center;
 	gap: 0.7rem;
 	margin-left: auto;
+}
+.account-menu {
+	position: relative;
+}
+.account-menu summary {
+	display: grid;
+	width: 2.65rem;
+	height: 2.65rem;
+	place-items: center;
+	border: 1px solid #bfc8be;
+	border-radius: 50%;
+	background: #dce7d8;
+	color: #173e29;
+	font-size: 0.82rem;
+	font-weight: 800;
+	cursor: pointer;
+	list-style: none;
+}
+.account-menu summary::-webkit-details-marker {
+	display: none;
+}
+.account-menu summary:hover {
+	border-color: #738578;
+	background: #d2e1ce;
+}
+.account-menu[open] summary {
+	box-shadow: 0 0 0 3px #e55b3426;
+}
+.account-submenu {
+	position: absolute;
+	top: calc(100% + 0.65rem);
+	right: 0;
+	z-index: 40;
+	width: 13.5rem;
+	padding: 0.65rem;
+	border: 1px solid #d2d2c8;
+	border-radius: 0.75rem;
+	background: #fffdf8;
+	box-shadow: 0 16px 36px #26342b24;
+}
+.account-submenu::before {
+	position: absolute;
+	top: -0.35rem;
+	right: 0.9rem;
+	width: 0.65rem;
+	height: 0.65rem;
+	border-top: 1px solid #d2d2c8;
+	border-left: 1px solid #d2d2c8;
+	background: #fffdf8;
+	content: '';
+	transform: rotate(45deg);
+}
+.account-copy {
+	padding: 0.45rem 0.55rem 0.65rem;
+	border-bottom: 1px solid #e3e1d8;
+}
+.account-copy strong,
+.account-copy small {
+	display: block;
+}
+.account-copy strong {
+	overflow: hidden;
+	font-size: 0.78rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.account-copy small {
+	margin-top: 0.2rem;
+	color: #7d847e;
+	font-size: 0.65rem;
+}
+.account-submenu form {
+	margin-top: 0.45rem;
+}
+.logout-button {
+	display: flex;
+	width: 100%;
+	min-height: 2.5rem;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0 0.55rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: transparent;
+	color: #8f3426;
+	font-size: 0.72rem;
+	font-weight: 750;
+}
+.logout-button:hover {
+	background: #f8e9e4;
+}
+.logout-button svg {
+	width: 1rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.8;
 }
 .primary,
 .secondary {

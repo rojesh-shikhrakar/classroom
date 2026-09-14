@@ -436,6 +436,7 @@
 	<main>
 		<AdminHeader
 			classroom={activeClass}
+			userName={data.user.name}
 			onOpenNavigation={() => (mobileOpen = true)}
 			onPreview={() => (modal = 'preview')}
 			onTogglePublished={() => {

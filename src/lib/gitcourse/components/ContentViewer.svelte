@@ -6,6 +6,7 @@
 	import CodeRenderer from '../renderers/CodeRenderer.svelte';
 	import ImageRenderer from '../renderers/ImageRenderer.svelte';
 	import DiffRenderer from '../renderers/DiffRenderer.svelte';
+	import MarkdownDiffRenderer from '../renderers/MarkdownDiffRenderer.svelte';
 
 	let bytes = $state<Uint8Array | null>(null);
 	let previousBytes = $state<Uint8Array | null>(null);
@@ -71,7 +72,15 @@
 		{:else if !courseStore.selectedFile}
 			<p class="text-sm text-[#667068]">Select a file to view its content.</p>
 		{:else if bytes}
-			{#if courseStore.diffMode && canDiff}
+			{#if courseStore.diffMode && canDiff && kind === 'markdown'}
+				<MarkdownDiffRenderer
+					oldBytes={previousBytes}
+					newBytes={bytes}
+					path={courseStore.selectedFile}
+					oldCommit={courseStore.previousCommitOid}
+					newCommit={courseStore.selectedCommit}
+				/>
+			{:else if courseStore.diffMode && canDiff}
 				<DiffRenderer oldBytes={previousBytes} newBytes={bytes} path={courseStore.selectedFile} />
 			{:else if kind === 'markdown'}
 				<MarkdownRenderer

@@ -87,7 +87,11 @@
 	<DashboardEntry bind:code userName={data.user.name} error={form?.error} />
 {:else}
 	{#if activeClass?.courseType === 'repository'}
-		<GitCourseView title={activeClass.title} repoUrl={activeClass.repoUrl} />
+		<GitCourseView
+			title={activeClass.title}
+			repoUrl={activeClass.repoUrl}
+			userName={data.user.name}
+		/>
 	{:else}
 		<div class:nav-collapsed={collapsed} class="classroom-shell">
 			{#if celebrationVisible}
