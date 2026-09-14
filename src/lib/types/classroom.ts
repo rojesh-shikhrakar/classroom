@@ -26,6 +26,8 @@ export type ClassroomContent = {
 	title: string;
 	description: string;
 	term: string;
+	courseType: 'lessons' | 'repository';
+	repoUrl: string;
 	published: boolean;
 	modules: ModuleContent[];
 };

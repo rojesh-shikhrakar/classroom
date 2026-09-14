@@ -19,6 +19,10 @@ export const classroom = sqliteTable(
 		title: text('title').notNull(),
 		description: text('description').notNull().default(''),
 		term: text('term').notNull().default(''),
+		courseType: text('course_type', { enum: ['lessons', 'repository'] })
+			.notNull()
+			.default('lessons'),
+		repoUrl: text('repo_url').notNull().default(''),
 		published: integer('published', { mode: 'boolean' }).notNull().default(false),
 		createdAt: integer('created_at', { mode: 'timestamp_ms' })
 			.notNull()

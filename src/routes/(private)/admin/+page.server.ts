@@ -48,6 +48,8 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 			term: room.term,
 			code: room.code,
 			description: room.description,
+			courseType: room.courseType,
+			repoUrl: room.repoUrl,
 			published: room.published,
 			studentCount: 0,
 			students: [],
@@ -125,6 +127,8 @@ function isSavedClassroom(value: unknown): value is AdminClassroom {
 		typeof room.term === 'string' &&
 		typeof room.code === 'string' &&
 		typeof room.description === 'string' &&
+		(room.courseType === 'lessons' || room.courseType === 'repository') &&
+		typeof room.repoUrl === 'string' &&
 		typeof room.published === 'boolean' &&
 		Array.isArray(room.modules) &&
 		room.modules.every(
@@ -226,6 +230,12 @@ export const actions: Actions = {
 			return fail(400, { error: 'The class needs a name and a valid 5–8 character code.' });
 		}
 		if (
+			room.courseType === 'repository' &&
+			!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(?:\.git)?\/?$/.test(room.repoUrl.trim())
+		) {
+			return fail(400, { error: 'Repository courses need a valid public GitHub repository URL.' });
+		}
+		if (
 			room.modules.some(
 				(module) => !module.title.trim() || module.items.some((item) => !item.title.trim())
 			)
@@ -284,10 +294,11 @@ export const actions: Actions = {
 		const statements: D1PreparedStatement[] = [
 			database
 				.prepare(
-					`INSERT INTO classroom (id, code, title, description, term, published, created_at)
-					 VALUES (?, ?, ?, ?, ?, ?, ?)
+					`INSERT INTO classroom (id, code, title, description, term, course_type, repo_url, published, created_at)
+					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 					 ON CONFLICT(id) DO UPDATE SET code = excluded.code, title = excluded.title,
-					 description = excluded.description, term = excluded.term, published = excluded.published`
+					 description = excluded.description, term = excluded.term, course_type = excluded.course_type,
+					 repo_url = excluded.repo_url, published = excluded.published`
 				)
 				.bind(
 					room.id,
@@ -295,6 +306,8 @@ export const actions: Actions = {
 					room.name.trim(),
 					room.description.trim(),
 					room.term.trim(),
+					room.courseType,
+					room.courseType === 'repository' ? room.repoUrl.trim().replace(/\.git\/?$/, '') : '',
 					room.published ? 1 : 0,
 					Date.now()
 				)

@@ -999,6 +999,70 @@ header h1 {
 .preview article small {
 	color: #888;
 }
+.repo-setup-card {
+	grid-column: 1 / -1;
+	max-width: 760px;
+	padding: clamp(1.5rem, 4vw, 3rem);
+	border: 1px solid #d9d8ce;
+	border-radius: 1.25rem;
+	background: #fff;
+}
+.repo-setup-card .repo-icon {
+	display: grid;
+	width: 3rem;
+	height: 3rem;
+	margin-bottom: 1.5rem;
+	place-items: center;
+	border-radius: 0.8rem;
+	background: #17231b;
+	color: #fff;
+}
+.repo-setup-card svg {
+	width: 1.5rem;
+	fill: currentColor;
+}
+.repo-setup-card > span {
+	color: #e8542d;
+	font-size: 0.75rem;
+	font-weight: 750;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+.repo-setup-card h3 {
+	margin: 0.45rem 0 0.75rem;
+	overflow-wrap: anywhere;
+	font-size: clamp(1.35rem, 3vw, 2rem);
+}
+.repo-setup-card p {
+	max-width: 60ch;
+	color: #6c706b;
+	line-height: 1.65;
+}
+.repo-setup-card a {
+	display: inline-flex;
+	min-height: 44px;
+	margin-top: 1rem;
+	align-items: center;
+	gap: 0.5rem;
+	color: #183f2a;
+	font-weight: 700;
+	text-decoration: underline;
+	text-underline-offset: 4px;
+}
+.field-help {
+	display: block;
+	margin-top: 0.4rem;
+	color: #777;
+	font-size: 0.78rem;
+	font-weight: 400;
+	line-height: 1.45;
+}
+.settings a {
+	color: #183f2a;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	overflow-wrap: anywhere;
+}
 .scrim {
 	display: none;
 }

@@ -6,6 +6,7 @@
 	import CourseSidebar from './CourseSidebar.svelte';
 	import DashboardEntry from './DashboardEntry.svelte';
 	import LessonView from './LessonView.svelte';
+	import GitCourseView from './GitCourseView.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -85,44 +86,48 @@
 {#if !inClass}
 	<DashboardEntry bind:code userName={data.user.name} error={form?.error} />
 {:else}
-	<div class:nav-collapsed={collapsed} class="classroom-shell">
-		{#if celebrationVisible}
-			{#key celebrationRun}<CompletionCelebration title={activeClass?.title ?? ''} />{/key}
-		{/if}
-		<CourseSidebar
-			title={activeClass?.title ?? ''}
-			classroomId={activeClass?.id ?? ''}
-			userName={data.user.name}
-			{modules}
-			{progress}
-			{activeLesson}
-			{completedLessonIds}
-			{expandedModules}
-			bind:mobileOpen
-			onToggleModule={toggleModule}
-			onOpenLesson={openLesson}
-		/>
-		<button
-			class="collapse-control"
-			type="button"
-			onclick={() => (collapsed = !collapsed)}
-			aria-label={collapsed ? 'Expand course navigation' : 'Collapse course navigation'}
-			aria-expanded={!collapsed}
-		>
-			<svg class:flip={collapsed} viewBox="0 0 24 24" aria-hidden="true"
-				><path d="m14 6-6 6 6 6" /></svg
+	{#if activeClass?.courseType === 'repository'}
+		<GitCourseView title={activeClass.title} repoUrl={activeClass.repoUrl} />
+	{:else}
+		<div class:nav-collapsed={collapsed} class="classroom-shell">
+			{#if celebrationVisible}
+				{#key celebrationRun}<CompletionCelebration title={activeClass?.title ?? ''} />{/key}
+			{/if}
+			<CourseSidebar
+				title={activeClass?.title ?? ''}
+				classroomId={activeClass?.id ?? ''}
+				userName={data.user.name}
+				{modules}
+				{progress}
+				{activeLesson}
+				{completedLessonIds}
+				{expandedModules}
+				bind:mobileOpen
+				onToggleModule={toggleModule}
+				onOpenLesson={openLesson}
+			/>
+			<button
+				class="collapse-control"
+				type="button"
+				onclick={() => (collapsed = !collapsed)}
+				aria-label={collapsed ? 'Expand course navigation' : 'Collapse course navigation'}
+				aria-expanded={!collapsed}
 			>
-		</button>
-		<LessonView
-			classroomId={activeClass?.id ?? ''}
-			lesson={currentLesson}
-			module={currentModule}
-			{previousLesson}
-			{nextLesson}
-			{completedLessonIds}
-			completionError={form?.completionError}
-			onOpenLesson={openLesson}
-			onCourseComplete={celebrateCourseCompletion}
-		/>
-	</div>
+				<svg class:flip={collapsed} viewBox="0 0 24 24" aria-hidden="true"
+					><path d="m14 6-6 6 6 6" /></svg
+				>
+			</button>
+			<LessonView
+				classroomId={activeClass?.id ?? ''}
+				lesson={currentLesson}
+				module={currentModule}
+				{previousLesson}
+				{nextLesson}
+				{completedLessonIds}
+				completionError={form?.completionError}
+				onOpenLesson={openLesson}
+				onCourseComplete={celebrateCourseCompletion}
+			/>
+		</div>
+	{/if}
 {/if}

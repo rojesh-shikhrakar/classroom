@@ -27,6 +27,18 @@
 			<dd>{classroom.code}</dd>
 		</div>
 		<div>
+			<dt>Course format</dt>
+			<dd>{classroom.courseType === 'repository' ? 'GitHub repository' : 'Modules and lessons'}</dd>
+		</div>
+		{#if classroom.courseType === 'repository'}<div>
+				<dt>Repository</dt>
+				<dd>
+					<a href={classroom.repoUrl} target="_blank" rel="noreferrer"
+						>{classroom.repoUrl.replace('https://github.com/', '')}</a
+					>
+				</dd>
+			</div>{/if}
+		<div>
 			<dt>Status</dt>
 			<dd>{classroom.published ? 'Published' : 'Draft'}</dd>
 		</div>

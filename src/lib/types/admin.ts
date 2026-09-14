@@ -30,6 +30,8 @@ export type AdminClassroom = {
 	term: string;
 	code: string;
 	description: string;
+	courseType: 'lessons' | 'repository';
+	repoUrl: string;
 	published: boolean;
 	studentCount: number;
 	students: AdminStudent[];

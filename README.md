@@ -50,4 +50,10 @@ Apply D1 migrations before running an existing installation:
 bunx wrangler d1 migrations apply personal-class --local
 ```
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Deploying through the project script applies pending remote D1 migrations before publishing the Worker:
+
+```sh
+bun run deploy
+```
+
+This expects `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_D1_TOKEN` in the environment. To apply only the remote migrations, run `bun run db:migrate:remote`.

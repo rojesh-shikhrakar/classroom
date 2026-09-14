@@ -13,6 +13,8 @@
 		name = $bindable(),
 		term = $bindable(),
 		description = $bindable(),
+		courseType = $bindable(),
+		repoUrl = $bindable(),
 		itemType = $bindable(),
 		details = $bindable(),
 		summary = $bindable(),
@@ -36,6 +38,8 @@
 		name: string;
 		term: string;
 		description: string;
+		courseType: 'lessons' | 'repository';
+		repoUrl: string;
 		itemType: AdminLesson['type'];
 		details: string;
 		summary: string;
@@ -75,6 +79,21 @@
 						>Class name<input required bind:value={name} placeholder="Introduction to AI" /></label
 					><label>Term<input required bind:value={term} placeholder="Fall 2026" /></label><label
 						>Description<textarea bind:value={description}></textarea></label
+					><label
+						>Course format<select bind:value={courseType}
+							><option value="lessons">Modules and lessons</option><option value="repository"
+								>GitHub repository</option
+							></select
+						></label
+					>
+					{#if courseType === 'repository'}<label
+							>GitHub repository URL<input
+								type="url"
+								required
+								bind:value={repoUrl}
+								placeholder="https://github.com/owner/course"
+							/></label
+						>{/if}
 					><button class="primary" type="submit">Create class</button>
 				</form>
 			{:else if modal === 'module'}<span>Course structure</span>
@@ -225,10 +244,23 @@
 				<form onsubmit={submitSettings}>
 					<label>Class name<input required bind:value={name} /></label><label
 						>Term<input bind:value={term} /></label
-					><label>Description<textarea bind:value={description}></textarea></label><button
-						class="primary"
-						type="submit">Save settings</button
+					><label>Description<textarea bind:value={description}></textarea></label><label
+						>Course format<select bind:value={courseType}
+							><option value="lessons">Modules and lessons</option><option value="repository"
+								>GitHub repository</option
+							></select
+						></label
 					>
+					{#if courseType === 'repository'}<label
+							>GitHub repository URL<input
+								type="url"
+								required
+								bind:value={repoUrl}
+								placeholder="https://github.com/owner/course"
+							/><small class="field-help"
+								>Use a public repository. Branches become modules and commits become lessons.</small
+							></label
+						>{/if}<button class="primary" type="submit">Save settings</button>
 				</form>{/if}
 		</div>
 	</div>

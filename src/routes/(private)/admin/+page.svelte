@@ -28,6 +28,8 @@
 	let name = $state('');
 	let term = $state('');
 	let description = $state('');
+	let courseType = $state<'lessons' | 'repository'>('lessons');
+	let repoUrl = $state('');
 	let itemType = $state<Item['type']>('Article');
 	let details = $state('');
 	let summary = $state('');
@@ -45,6 +47,8 @@
 		term: '',
 		code: '',
 		description: '',
+		courseType: 'lessons',
+		repoUrl: '',
 		published: false,
 		studentCount: 0,
 		students: [],
@@ -90,7 +94,18 @@
 		setTimeout(() => (notice = ''), 2000);
 	}
 	function draftSnapshot() {
-		return JSON.stringify({ name, term, description, itemType, details, summary, body, quiz });
+		return JSON.stringify({
+			name,
+			term,
+			description,
+			courseType,
+			repoUrl,
+			itemType,
+			details,
+			summary,
+			body,
+			quiz
+		});
 	}
 	function markDraft() {
 		initialDraft = draftSnapshot();
@@ -152,6 +167,8 @@
 		name = '';
 		term = '';
 		description = '';
+		courseType = 'lessons';
+		repoUrl = '';
 		markDraft();
 		modal = 'class';
 	}
@@ -188,6 +205,8 @@
 		name = activeClass.name;
 		term = activeClass.term;
 		description = activeClass.description;
+		courseType = activeClass.courseType;
+		repoUrl = activeClass.repoUrl;
 		markDraft();
 		modal = 'settings';
 	}
@@ -212,6 +231,8 @@
 			term: term.trim(),
 			code,
 			description: description.trim(),
+			courseType,
+			repoUrl: courseType === 'repository' ? repoUrl.trim() : '',
 			published: false,
 			studentCount: 0,
 			students: [],
@@ -298,7 +319,9 @@
 			...c,
 			name: name.trim(),
 			term: term.trim(),
-			description: description.trim()
+			description: description.trim(),
+			courseType,
+			repoUrl: courseType === 'repository' ? repoUrl.trim() : ''
 		}));
 		modal = null;
 		flash('Settings saved');
@@ -471,6 +494,8 @@
 	bind:name
 	bind:term
 	bind:description
+	bind:courseType
+	bind:repoUrl
 	bind:itemType
 	bind:details
 	bind:summary
