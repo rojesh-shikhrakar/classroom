@@ -12,6 +12,7 @@
 		editingId,
 		name = $bindable(),
 		term = $bindable(),
+		code = $bindable(),
 		description = $bindable(),
 		courseType = $bindable(),
 		repoUrl = $bindable(),
@@ -37,6 +38,7 @@
 		editingId: string | null;
 		name: string;
 		term: string;
+		code: string;
 		description: string;
 		courseType: 'lessons' | 'repository';
 		repoUrl: string;
@@ -244,6 +246,19 @@
 				<form onsubmit={submitSettings}>
 					<label>Class name<input required bind:value={name} /></label><label
 						>Term<input bind:value={term} /></label
+					><label
+						>Class code<input
+							required
+							bind:value={code}
+							minlength="5"
+							maxlength="8"
+							pattern="[A-Za-z0-9]+"
+							autocomplete="off"
+							spellcheck="false"
+							placeholder="AI101"
+						/><small class="field-help"
+							>Use 5–8 letters or numbers. The code is not case-sensitive.</small
+						></label
 					><label>Description<textarea bind:value={description}></textarea></label><label
 						>Course format<select bind:value={courseType}
 							><option value="lessons">Modules and lessons</option><option value="repository"

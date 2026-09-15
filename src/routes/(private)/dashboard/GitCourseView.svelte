@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	import { courseStore } from '$lib/gitcourse/stores/course.svelte';
 	import { detectKind } from '$lib/gitcourse/renderers/detect';
@@ -7,7 +8,12 @@
 	import FileExplorer from '$lib/gitcourse/components/FileExplorer.svelte';
 	import ContentViewer from '$lib/gitcourse/components/ContentViewer.svelte';
 
-	let { title, repoUrl, userName }: { title: string; repoUrl: string; userName: string } = $props();
+	let {
+		title,
+		classroomId,
+		repoUrl,
+		userName
+	}: { title: string; classroomId: string; repoUrl: string; userName: string } = $props();
 	let kind = $derived(courseStore.selectedFile ? detectKind(courseStore.selectedFile) : null);
 	let canDiff = $derived(kind !== null && kind !== 'image' && !!courseStore.previousCommitOid);
 	let repositoryTitle = $derived(
@@ -46,6 +52,15 @@
 				</summary>
 				<div class="git-account-submenu">
 					<div class="git-account-copy"><strong>{userName}</strong><small>Student</small></div>
+					<form method="post" action="?/leaveClassroom" use:enhance>
+						<input type="hidden" name="classroomId" value={classroomId} />
+						<button type="submit" class="git-exit-course-button">
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<path d="M4 5h10v14H4zM14 12h6m-3-3 3 3-3 3" />
+							</svg>
+							Exit course
+						</button>
+					</form>
 					<form method="post" action="?/signOut">
 						<button type="submit" class="git-logout-button">
 							<svg viewBox="0 0 24 24" aria-hidden="true">

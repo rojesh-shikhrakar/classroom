@@ -3,6 +3,7 @@
 	import { readFileBlob } from '../git/blobs';
 	import { detectKind } from '../renderers/detect';
 	import MarkdownRenderer from '../renderers/MarkdownRenderer.svelte';
+	import NotebookRenderer from '../renderers/NotebookRenderer.svelte';
 	import CodeRenderer from '../renderers/CodeRenderer.svelte';
 	import ImageRenderer from '../renderers/ImageRenderer.svelte';
 	import DiffRenderer from '../renderers/DiffRenderer.svelte';
@@ -64,7 +65,11 @@
 </script>
 
 <div class="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#fffdf8]">
-	<div class="p-6">
+	<div
+		class:p-6={kind !== 'notebook'}
+		class:min-w-0={kind === 'notebook'}
+		class:w-full={kind === 'notebook'}
+	>
 		{#if loading}
 			<p class="text-sm text-[#667068]">Loading…</p>
 		{:else if error}
@@ -88,6 +93,8 @@
 					path={courseStore.selectedFile}
 					commit={courseStore.selectedCommit}
 				/>
+			{:else if kind === 'notebook'}
+				<NotebookRenderer {bytes} />
 			{:else if kind === 'image'}
 				<ImageRenderer {bytes} path={courseStore.selectedFile} />
 			{:else if kind === 'code'}

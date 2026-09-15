@@ -89,6 +89,7 @@
 	{#if activeClass?.courseType === 'repository'}
 		<GitCourseView
 			title={activeClass.title}
+			classroomId={activeClass.id}
 			repoUrl={activeClass.repoUrl}
 			userName={data.user.name}
 		/>

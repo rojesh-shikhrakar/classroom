@@ -27,6 +27,7 @@
 	let notice = $state('');
 	let name = $state('');
 	let term = $state('');
+	let code = $state('');
 	let description = $state('');
 	let courseType = $state<'lessons' | 'repository'>('lessons');
 	let repoUrl = $state('');
@@ -97,6 +98,7 @@
 		return JSON.stringify({
 			name,
 			term,
+			code,
 			description,
 			courseType,
 			repoUrl,
@@ -204,6 +206,7 @@
 	function openSettings() {
 		name = activeClass.name;
 		term = activeClass.term;
+		code = activeClass.code;
 		description = activeClass.description;
 		courseType = activeClass.courseType;
 		repoUrl = activeClass.repoUrl;
@@ -315,10 +318,15 @@
 	}
 	function submitSettings(event: SubmitEvent) {
 		event.preventDefault();
+		const normalizedCode = code
+			.trim()
+			.replace(/[\s-]+/g, '')
+			.toUpperCase();
 		updateClass((c) => ({
 			...c,
 			name: name.trim(),
 			term: term.trim(),
+			code: normalizedCode,
 			description: description.trim(),
 			courseType,
 			repoUrl: courseType === 'repository' ? repoUrl.trim() : ''
@@ -494,6 +502,7 @@
 	{editingId}
 	bind:name
 	bind:term
+	bind:code
 	bind:description
 	bind:courseType
 	bind:repoUrl

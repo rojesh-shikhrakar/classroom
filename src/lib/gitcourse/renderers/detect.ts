@@ -1,4 +1,4 @@
-export type RendererKind = 'markdown' | 'code' | 'image' | 'text';
+export type RendererKind = 'markdown' | 'notebook' | 'code' | 'image' | 'text';
 
 const IMAGE_EXT = new Set(['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif']);
 const MD_EXT = new Set(['md', 'mdx']);
@@ -36,6 +36,7 @@ function extOf(path: string): string {
 
 export function detectKind(path: string): RendererKind {
 	const ext = extOf(path);
+	if (ext === 'ipynb') return 'notebook';
 	if (MD_EXT.has(ext)) return 'markdown';
 	if (IMAGE_EXT.has(ext)) return 'image';
 	if (ext in CODE_LANG) return 'code';
